@@ -1,0 +1,57 @@
+{
+  "app": { "title": "QR-меню", "admin": "Панель управления" },
+  "lang": { "label": "Язык", "ru": "Русский", "en": "English" },
+  "nav": { "tables": "Столы и QR", "logout": "Выйти" },
+  "roles": { "admin": "Администратор", "waiter": "Официант" },
+  "login": {
+    "title": "Вход в панель",
+    "email": "Email",
+    "password": "Пароль",
+    "submit": "Войти",
+    "invalid": "Неверный email или пароль"
+  },
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Изменить",
+    "loading": "Загрузка…",
+    "confirmDelete": "Удалить «{{name}}»?"
+  },
+  "errors": {
+    "unknown_error": "Что-то пошло не так",
+    "validation_error": "Проверьте заполнение полей",
+    "table_number_taken": "Стол с таким номером уже есть",
+    "hall_not_found": "Зал не найден",
+    "table_not_found": "Стол не найден",
+    "forbidden": "Недостаточно прав"
+  },
+  "tables": {
+    "title": "Столы и QR",
+    "addTable": "Добавить стол",
+    "addHall": "Добавить зал",
+    "hallName": "Название зала",
+    "noHall": "Без зала",
+    "empty": "Столов пока нет",
+    "number": "Номер стола",
+    "hall": "Зал",
+    "capacity": "Мест",
+    "active": "Активен",
+    "inactive": "Выключен",
+    "seats_one": "{{count}} место",
+    "seats_few": "{{count}} места",
+    "seats_many": "{{count}} мест",
+    "seats_other": "{{count}} места",
+    "newTable": "Новый стол",
+    "editTable": "Стол {{number}}",
+    "qr": "QR-код",
+    "downloadPng": "PNG",
+    "downloadSvg": "SVG",
+    "regenerate": "Перевыпустить QR",
+    "regenerateConfirm": "Перевыпустить QR стола {{number}}? Старый напечатанный QR перестанет работать.",
+    "regenerated": "QR перевыпущен",
+    "issuedAt": "Выпущен {{date}}",
+    "copyLink": "Копировать ссылку",
+    "copied": "Скопировано"
+  }
+}

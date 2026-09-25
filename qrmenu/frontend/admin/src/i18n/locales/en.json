@@ -1,0 +1,55 @@
+{
+  "app": { "title": "QR Menu", "admin": "Admin panel" },
+  "lang": { "label": "Language", "ru": "Русский", "en": "English" },
+  "nav": { "tables": "Tables & QR", "logout": "Log out" },
+  "roles": { "admin": "Administrator", "waiter": "Waiter" },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "invalid": "Wrong email or password"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading…",
+    "confirmDelete": "Delete “{{name}}”?"
+  },
+  "errors": {
+    "unknown_error": "Something went wrong",
+    "validation_error": "Please check the form",
+    "table_number_taken": "A table with this number already exists",
+    "hall_not_found": "Hall not found",
+    "table_not_found": "Table not found",
+    "forbidden": "Not allowed"
+  },
+  "tables": {
+    "title": "Tables & QR",
+    "addTable": "Add table",
+    "addHall": "Add hall",
+    "hallName": "Hall name",
+    "noHall": "No hall",
+    "empty": "No tables yet",
+    "number": "Table number",
+    "hall": "Hall",
+    "capacity": "Seats",
+    "active": "Active",
+    "inactive": "Disabled",
+    "seats_one": "{{count}} seat",
+    "seats_other": "{{count}} seats",
+    "newTable": "New table",
+    "editTable": "Table {{number}}",
+    "qr": "QR code",
+    "downloadPng": "PNG",
+    "downloadSvg": "SVG",
+    "regenerate": "Reissue QR",
+    "regenerateConfirm": "Reissue the QR for table {{number}}? The old printed QR will stop working.",
+    "regenerated": "QR reissued",
+    "issuedAt": "Issued {{date}}",
+    "copyLink": "Copy link",
+    "copied": "Copied"
+  }
+}
