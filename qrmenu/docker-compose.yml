@@ -39,6 +39,9 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+      MEDIA_DIR: /data/media
+    volumes:
+      - media:/data/media
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -63,6 +66,7 @@ services:
       - "443:443"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - media:/srv/media:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -76,7 +80,9 @@ services:
       context: ./backend
       args:
         INSTALL_DEV: "true"
-    environment: *api-env
+    environment:
+      <<: *api-env
+      MEDIA_DIR: /tmp/media
     entrypoint: []
     command: ["pytest", "-q"]
     depends_on:
@@ -85,5 +91,6 @@ services:
 
 volumes:
   pgdata:
+  media:
   caddy_data:
   caddy_config:

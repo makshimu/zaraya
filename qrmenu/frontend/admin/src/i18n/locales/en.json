@@ -1,8 +1,22 @@
 {
-  "app": { "title": "QR Menu", "admin": "Admin panel" },
-  "lang": { "label": "Language", "ru": "Русский", "en": "English" },
-  "nav": { "tables": "Tables & QR", "logout": "Log out" },
-  "roles": { "admin": "Administrator", "waiter": "Waiter" },
+  "app": {
+    "title": "QR Menu",
+    "admin": "Admin panel"
+  },
+  "lang": {
+    "label": "Language",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "nav": {
+    "menu": "Menu",
+    "tables": "Tables & QR",
+    "logout": "Log out"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "waiter": "Waiter"
+  },
   "login": {
     "title": "Sign in",
     "email": "Email",
@@ -24,7 +38,16 @@
     "table_number_taken": "A table with this number already exists",
     "hall_not_found": "Hall not found",
     "table_not_found": "Table not found",
-    "forbidden": "Not allowed"
+    "forbidden": "Not allowed",
+    "category_not_found": "Category not found",
+    "item_not_found": "Dish not found",
+    "modifier_group_not_found": "Modifier group not found",
+    "image_not_found": "Photo not found, please upload again",
+    "invalid_image": "The file is not an image",
+    "file_too_large": "File is too large (max 10 MB)",
+    "order_ids_mismatch": "The menu has changed, please reload",
+    "price_not_found": "Price not found",
+    "modifier_not_found": "Modifier not found"
   },
   "tables": {
     "title": "Tables & QR",
@@ -51,5 +74,56 @@
     "issuedAt": "Issued {{date}}",
     "copyLink": "Copy link",
     "copied": "Copied"
+  },
+  "menu": {
+    "title": "My digital menu",
+    "tabMenu": "Categories & dishes",
+    "search": "Search dishes",
+    "addCategory": "Add category",
+    "addItem": "Add dish",
+    "addGroup": "Add group",
+    "emptyMenu": "No categories yet",
+    "nothingFound": "Nothing found",
+    "name": "Name",
+    "description": "Description",
+    "photo": "Photo",
+    "photoOptional": "Photo (optional)",
+    "uploadPhoto": "Upload",
+    "removePhoto": "Remove photo",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "outOfStock": "Out of stock",
+    "schedule": "Show only at certain times",
+    "from": "from",
+    "to": "to",
+    "category": "Category",
+    "badges": "Badges",
+    "prices": "Prices",
+    "addPrice": "Add variant",
+    "priceName": "Variant (size/portion)",
+    "amount": "Price",
+    "default": "default",
+    "modifierGroups": "Modifier groups",
+    "modifiers": "Modifiers",
+    "addModifier": "Add modifier",
+    "noModifiers": "No modifiers yet",
+    "noGroupsYet": "No modifier groups yet",
+    "minSelect": "Min. picks",
+    "maxSelect": "Max. picks",
+    "required": "Required",
+    "optional": "Optional",
+    "selectRange": "pick {{min}}–{{max}}",
+    "minGtMax": "Minimum can't exceed maximum",
+    "surcharge": "Surcharge",
+    "drag": "Drag",
+    "confirmDeleteCategory": "Delete category “{{name}}” with all its dishes?",
+    "confirmDeleteGroup": "Delete group “{{name}}”? It will be removed from all dishes."
+  },
+  "badges": {
+    "spicy": "Spicy",
+    "vegan": "Vegan",
+    "vegetarian": "Vegetarian",
+    "hit": "Bestseller",
+    "new": "New"
   }
 }

@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     admin_email: str = "admin@example.com"
     admin_password: str = "admin"
 
+    # Uploaded images; served by Caddy (and by the api itself in dev) under /media
+    media_dir: str = "/data/media"
+    media_url_prefix: str = "/media"
+    max_upload_mb: int = 10
+
     table_token_bytes: int = 12  # 12 bytes -> 16 url-safe chars
 
 

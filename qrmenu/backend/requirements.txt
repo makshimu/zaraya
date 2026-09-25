@@ -9,3 +9,5 @@ pyjwt>=2.8
 bcrypt>=4.1
 segno>=1.6
 redis>=5.0
+pillow>=10.4
+python-multipart>=0.0.9

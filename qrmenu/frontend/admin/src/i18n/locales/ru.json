@@ -1,8 +1,22 @@
 {
-  "app": { "title": "QR-меню", "admin": "Панель управления" },
-  "lang": { "label": "Язык", "ru": "Русский", "en": "English" },
-  "nav": { "tables": "Столы и QR", "logout": "Выйти" },
-  "roles": { "admin": "Администратор", "waiter": "Официант" },
+  "app": {
+    "title": "QR-меню",
+    "admin": "Панель управления"
+  },
+  "lang": {
+    "label": "Язык",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "nav": {
+    "menu": "Меню",
+    "tables": "Столы и QR",
+    "logout": "Выйти"
+  },
+  "roles": {
+    "admin": "Администратор",
+    "waiter": "Официант"
+  },
   "login": {
     "title": "Вход в панель",
     "email": "Email",
@@ -24,7 +38,16 @@
     "table_number_taken": "Стол с таким номером уже есть",
     "hall_not_found": "Зал не найден",
     "table_not_found": "Стол не найден",
-    "forbidden": "Недостаточно прав"
+    "forbidden": "Недостаточно прав",
+    "category_not_found": "Категория не найдена",
+    "item_not_found": "Блюдо не найдено",
+    "modifier_group_not_found": "Группа модификаторов не найдена",
+    "image_not_found": "Фото не найдено, загрузите заново",
+    "invalid_image": "Файл не похож на изображение",
+    "file_too_large": "Файл слишком большой (макс. 10 МБ)",
+    "order_ids_mismatch": "Меню изменилось, обновите страницу",
+    "price_not_found": "Цена не найдена",
+    "modifier_not_found": "Модификатор не найден"
   },
   "tables": {
     "title": "Столы и QR",
@@ -53,5 +76,56 @@
     "issuedAt": "Выпущен {{date}}",
     "copyLink": "Копировать ссылку",
     "copied": "Скопировано"
+  },
+  "menu": {
+    "title": "Моё цифровое меню",
+    "tabMenu": "Категории и блюда",
+    "search": "Поиск блюд",
+    "addCategory": "Добавить категорию",
+    "addItem": "Добавить блюдо",
+    "addGroup": "Добавить группу",
+    "emptyMenu": "В меню пока нет категорий",
+    "nothingFound": "Ничего не найдено",
+    "name": "Название",
+    "description": "Описание",
+    "photo": "Фото",
+    "photoOptional": "Фото (необязательно)",
+    "uploadPhoto": "Загрузить",
+    "removePhoto": "Убрать фото",
+    "enabled": "Включено",
+    "disabled": "Выключено",
+    "outOfStock": "Нет в наличии",
+    "schedule": "Показывать только в определённое время",
+    "from": "с",
+    "to": "до",
+    "category": "Категория",
+    "badges": "Бейджи",
+    "prices": "Цены",
+    "addPrice": "Добавить вариант",
+    "priceName": "Вариант (размер/порция)",
+    "amount": "Цена",
+    "default": "по умолчанию",
+    "modifierGroups": "Группы модификаторов",
+    "modifiers": "Модификаторы",
+    "addModifier": "Добавить модификатор",
+    "noModifiers": "Модификаторов пока нет",
+    "noGroupsYet": "Групп модификаторов пока нет",
+    "minSelect": "Мин. выбор",
+    "maxSelect": "Макс. выбор",
+    "required": "Обязательная",
+    "optional": "Необязательная",
+    "selectRange": "выбор {{min}}–{{max}}",
+    "minGtMax": "Минимум не может быть больше максимума",
+    "surcharge": "Доплата",
+    "drag": "Перетащить",
+    "confirmDeleteCategory": "Удалить категорию «{{name}}» вместе со всеми блюдами?",
+    "confirmDeleteGroup": "Удалить группу «{{name}}»? Она пропадёт у всех блюд."
+  },
+  "badges": {
+    "spicy": "Острое",
+    "vegan": "Веган",
+    "vegetarian": "Вегетарианское",
+    "hit": "Хит",
+    "new": "Новинка"
   }
 }

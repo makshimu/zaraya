@@ -1,11 +1,13 @@
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import APIRouter, FastAPI, Response, status
+from fastapi.staticfiles import StaticFiles
 from redis.asyncio import Redis
 from sqlalchemy import text
 
-from app.api import auth, settings, tables
+from app.api import auth, menu, settings, tables
 from app.core.config import get_settings
 from app.core.db import SessionLocal
 
@@ -28,7 +30,13 @@ admin = APIRouter(prefix="/api/admin")
 admin.include_router(auth.router)
 admin.include_router(settings.router)
 admin.include_router(tables.router)
+admin.include_router(menu.router)
 app.include_router(admin)
+
+# In production Caddy serves /media straight from the volume; this mount covers local dev
+_media = get_settings()
+Path(_media.media_dir).mkdir(parents=True, exist_ok=True)
+app.mount(_media.media_url_prefix, StaticFiles(directory=_media.media_dir), name="media")
 
 
 @app.get("/api/health", tags=["health"])

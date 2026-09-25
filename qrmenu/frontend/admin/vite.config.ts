@@ -6,6 +6,9 @@ export default defineConfig({
   base: '/admin/',
   plugins: [react(), tailwindcss()],
   server: {
-    proxy: { '/api': process.env.VITE_API_PROXY ?? 'http://localhost:8000' },
+    proxy: {
+      '/api': process.env.VITE_API_PROXY ?? 'http://localhost:8000',
+      '/media': process.env.VITE_API_PROXY ?? 'http://localhost:8000',
+    },
   },
 })

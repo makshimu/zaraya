@@ -16,6 +16,8 @@ class RestaurantSettings(Base):
     currency: Mapped[str] = mapped_column(String(3), default="VND")
     languages: Mapped[list[str]] = mapped_column(ARRAY(String(8)), default=lambda: ["ru", "en"])
     default_language: Mapped[str] = mapped_column(String(8), default="ru")
+    # IANA zone used for category display schedules
+    timezone: Mapped[str] = mapped_column(String(64), default="Asia/Ho_Chi_Minh")
     session_ttl_minutes: Mapped[int] = mapped_column(default=180)
     require_first_order_confirmation: Mapped[bool] = mapped_column(default=True)
     require_table_open: Mapped[bool] = mapped_column(default=False)

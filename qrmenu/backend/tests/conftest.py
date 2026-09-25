@@ -11,6 +11,9 @@ os.environ["DATABASE_URL"] = TEST_URL
 os.environ["PUBLIC_BASE_URL"] = "https://menu.test"
 os.environ["ADMIN_EMAIL"] = "admin@example.com"
 os.environ["ADMIN_PASSWORD"] = "secret-pass"
+import tempfile  # noqa: E402
+
+os.environ["MEDIA_DIR"] = tempfile.mkdtemp(prefix="qrmenu-media-")
 os.environ["JWT_SECRET"] = "test-secret-that-is-long-enough-for-hs256"
 
 import asyncpg  # noqa: E402
@@ -57,7 +60,10 @@ async def database() -> AsyncIterator[None]:
 async def clean_db() -> AsyncIterator[None]:
     async with engine.begin() as conn:
         await conn.execute(
-            text('TRUNCATE "audit_log", "table", "hall", "user", "restaurant_settings" RESTART IDENTITY CASCADE')
+            text(
+                'TRUNCATE "audit_log", "table", "hall", "user", "restaurant_settings", '
+                '"category", "modifier_group" RESTART IDENTITY CASCADE'
+            )
         )
     async with SessionLocal() as db:
         await ensure_initial_data(db)

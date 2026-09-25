@@ -70,6 +70,7 @@ class RestaurantSettingsOut(BaseModel):
     currency: str
     languages: list[str]
     default_language: str
+    timezone: str
     session_ttl_minutes: int
     require_first_order_confirmation: bool
     require_table_open: bool

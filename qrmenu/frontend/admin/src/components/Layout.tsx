@@ -1,11 +1,14 @@
-import { LogOut, QrCode } from 'lucide-react'
+import { BookOpen, LogOut, QrCode } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router-dom'
 
 import { useAuth } from '../auth/AuthContext'
 import LanguageSwitcher from './LanguageSwitcher'
 
-const NAV = [{ to: '/tables', label: 'nav.tables', icon: QrCode }]
+const NAV = [
+  { to: '/menu', label: 'nav.menu', icon: BookOpen },
+  { to: '/tables', label: 'nav.tables', icon: QrCode },
+]
 
 export default function Layout() {
   const { t } = useTranslation()
