@@ -9,6 +9,7 @@
     "en": "English"
   },
   "nav": {
+    "orders": "Заказы",
     "menu": "Меню",
     "tables": "Столы и QR",
     "logout": "Выйти",
@@ -48,7 +49,11 @@
     "file_too_large": "Файл слишком большой (макс. 10 МБ)",
     "order_ids_mismatch": "Меню изменилось, обновите страницу",
     "price_not_found": "Цена не найдена",
-    "modifier_not_found": "Модификатор не найден"
+    "modifier_not_found": "Модификатор не найден",
+    "invalid_transition": "Статус уже изменился, обновляю",
+    "order_not_editable": "Заказ уже готовится — менять нельзя",
+    "order_not_found": "Заказ не найден",
+    "order_item_not_found": "Позиция не найдена"
   },
   "tables": {
     "title": "Столы и QR",
@@ -147,5 +152,51 @@
     "requireOpen": "Стол должен быть открыт официантом",
     "requireOpenHint": "Заказ возможен только после того, как официант откроет стол при посадке гостей.",
     "saved": "Сохранено"
+  },
+  "realtime": {
+    "online": "Онлайн",
+    "offline": "Нет связи, переподключаемся…",
+    "enableNotifications": "Включить звук и уведомления"
+  },
+  "orders": {
+    "title": "Заказы",
+    "table": "Стол",
+    "tableN": "Стол {{number}}",
+    "allTables": "Все столы",
+    "date": "Дата",
+    "empty": "Заказов нет",
+    "newOrderTitle": "Новый заказ — стол {{table}}",
+    "newOrderBody_one": "{{count}} позиция",
+    "newOrderBody_few": "{{count}} позиции",
+    "newOrderBody_many": "{{count}} позиций",
+    "newOrderBody_other": "{{count}} позиции",
+    "confirmReject": "Отклонить заказ №{{id}}?",
+    "decrease": "Меньше",
+    "increase": "Больше",
+    "filter": {
+      "active": "Активные",
+      "all": "Все",
+      "pending": "Ждут подтверждения",
+      "accepted": "Приняты",
+      "cooking": "Готовятся",
+      "served": "Поданы",
+      "closed": "Закрыты",
+      "rejected": "Отклонены"
+    },
+    "status": {
+      "pending": "Ждёт подтверждения",
+      "accepted": "Принят",
+      "cooking": "Готовится",
+      "served": "Подан",
+      "closed": "Закрыт",
+      "rejected": "Отклонён"
+    },
+    "action": {
+      "accepted": "Принять",
+      "rejected": "Отклонить",
+      "cooking": "Готовится",
+      "served": "Подан",
+      "closed": "Закрыть"
+    }
   }
 }

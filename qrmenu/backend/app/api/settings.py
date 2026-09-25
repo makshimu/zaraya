@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.deps import DB, AdminUser, CurrentUser
 from app.models import RestaurantSettings
@@ -6,8 +6,11 @@ from app.schemas import RestaurantSettingsOut
 from app.schemas.menu import RestaurantSettingsIn
 from app.services import media
 from app.services.audit import audit
+from app.services.realtime import notify_menu_changed
 
-router = APIRouter(prefix="/settings", tags=["settings"])
+router = APIRouter(
+    prefix="/settings", tags=["settings"], dependencies=[Depends(notify_menu_changed)]
+)
 
 
 def settings_out(s: RestaurantSettings) -> RestaurantSettingsOut:

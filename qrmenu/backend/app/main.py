@@ -7,9 +7,10 @@ from fastapi.staticfiles import StaticFiles
 from redis.asyncio import Redis
 from sqlalchemy import text
 
-from app.api import auth, guest, menu, settings, tables
+from app.api import auth, guest, menu, orders, settings, tables
 from app.core.config import get_settings
 from app.core.db import SessionLocal
+from app.services.realtime import hub
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
@@ -21,7 +22,9 @@ log = logging.getLogger("app")
 async def lifespan(_: FastAPI):
     if get_settings().jwt_secret == "change-me":
         log.warning("JWT_SECRET is not set - using an insecure default")
+    hub.start()
     yield
+    await hub.stop()
 
 
 app = FastAPI(title="QR Menu API", lifespan=lifespan, docs_url="/api/docs", openapi_url="/api/openapi.json")
@@ -31,6 +34,7 @@ admin.include_router(auth.router)
 admin.include_router(settings.router)
 admin.include_router(tables.router)
 admin.include_router(menu.router)
+admin.include_router(orders.router)
 app.include_router(admin)
 app.include_router(guest.router)
 app.include_router(guest.qr_router)

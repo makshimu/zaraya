@@ -8,6 +8,7 @@ BASE_URL = os.environ.get(
 TEST_DB = BASE_URL.rsplit("/", 1)[1] + "_test"
 TEST_URL = BASE_URL.rsplit("/", 1)[0] + "/" + TEST_DB
 os.environ["DATABASE_URL"] = TEST_URL
+os.environ["DATABASE_NULL_POOL"] = "true"
 os.environ["PUBLIC_BASE_URL"] = "https://menu.test"
 os.environ["ADMIN_EMAIL"] = "admin@example.com"
 os.environ["ADMIN_PASSWORD"] = "secret-pass"
@@ -62,7 +63,7 @@ async def clean_db() -> AsyncIterator[None]:
         await conn.execute(
             text(
                 'TRUNCATE "audit_log", "table", "hall", "user", "restaurant_settings", '
-                '"category", "modifier_group", "table_session" RESTART IDENTITY CASCADE'
+                '"category", "modifier_group", "table_session", "order" RESTART IDENTITY CASCADE'
             )
         )
     async with SessionLocal() as db:

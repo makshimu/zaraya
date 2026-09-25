@@ -1,6 +1,12 @@
 // Inline icons instead of an icon library: keeps the guest bundle small for slow phones.
 type P = { className?: string }
-const base = { fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' } as const
+const base = {
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+} as const
 
 export const SearchIcon = ({ className }: P) => (
   <svg viewBox="0 0 24 24" className={className} {...base} aria-hidden>

@@ -38,7 +38,9 @@ export default function Header({
         </label>
       ) : (
         <>
-          {restaurant.logo_urls && <img src={restaurant.logo_urls.w400} alt="" className="size-10 rounded-full object-cover" />}
+          {restaurant.logo_urls && (
+            <img src={restaurant.logo_urls.w400} alt="" className="size-10 rounded-full object-cover" />
+          )}
           <div className="min-w-0 flex-1">
             <div className="truncate text-lg leading-tight font-bold">{name}</div>
             {tableNumber && <div className="text-sm text-slate-500">{t('table', { number: tableNumber })}</div>}

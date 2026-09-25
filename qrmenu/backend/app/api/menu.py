@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
@@ -20,8 +20,9 @@ from app.schemas.menu import (
 )
 from app.services import media
 from app.services.audit import audit
+from app.services.realtime import notify_menu_changed
 
-router = APIRouter(tags=["menu"])
+router = APIRouter(tags=["menu"], dependencies=[Depends(notify_menu_changed)])
 
 UNPROCESSABLE = 422
 

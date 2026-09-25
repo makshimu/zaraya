@@ -137,3 +137,45 @@ export interface ModifierGroupInput {
   is_required: boolean
   modifiers: Modifier[]
 }
+
+export type OrderStatus = 'pending' | 'accepted' | 'cooking' | 'served' | 'closed' | 'rejected'
+
+export const ORDER_STATUSES: OrderStatus[] = ['pending', 'accepted', 'cooking', 'served', 'closed', 'rejected']
+export const ACTIVE_STATUSES: OrderStatus[] = ['pending', 'accepted', 'cooking', 'served']
+export const EDITABLE_STATUSES: OrderStatus[] = ['pending', 'accepted']
+
+// Mirrors the backend's allowed transitions
+export const NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
+  pending: ['accepted', 'rejected'],
+  accepted: ['cooking', 'served', 'rejected'],
+  cooking: ['served'],
+  served: ['closed'],
+  closed: [],
+  rejected: [],
+}
+
+export interface OrderItem {
+  id: number
+  item_id: number | null
+  name: Localized
+  price_name: Localized
+  unit_price: number
+  quantity: number
+  total: number
+  comment: string
+  modifiers: { group_name: Localized; name: Localized; price: number }[]
+}
+
+export interface Order {
+  id: number
+  table_id: number
+  table_number: string
+  session_id: string
+  status: OrderStatus
+  comment: string
+  total: number
+  created_at: string
+  updated_at: string
+  updated_by: string | null
+  items: OrderItem[]
+}

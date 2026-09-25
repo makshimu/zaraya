@@ -9,6 +9,7 @@
     "en": "English"
   },
   "nav": {
+    "orders": "Orders",
     "menu": "Menu",
     "tables": "Tables & QR",
     "logout": "Log out",
@@ -48,7 +49,11 @@
     "file_too_large": "File is too large (max 10 MB)",
     "order_ids_mismatch": "The menu has changed, please reload",
     "price_not_found": "Price not found",
-    "modifier_not_found": "Modifier not found"
+    "modifier_not_found": "Modifier not found",
+    "invalid_transition": "The status has already changed, refreshing",
+    "order_not_editable": "The order is already cooking and can't be changed",
+    "order_not_found": "Order not found",
+    "order_item_not_found": "Order line not found"
   },
   "tables": {
     "title": "Tables & QR",
@@ -145,5 +150,49 @@
     "requireOpen": "Table must be opened by a waiter",
     "requireOpenHint": "Orders are only possible after a waiter opens the table when seating guests.",
     "saved": "Saved"
+  },
+  "realtime": {
+    "online": "Online",
+    "offline": "Offline, reconnecting…",
+    "enableNotifications": "Enable sound & notifications"
+  },
+  "orders": {
+    "title": "Orders",
+    "table": "Table",
+    "tableN": "Table {{number}}",
+    "allTables": "All tables",
+    "date": "Date",
+    "empty": "No orders",
+    "newOrderTitle": "New order — table {{table}}",
+    "newOrderBody_one": "{{count}} item",
+    "newOrderBody_other": "{{count}} items",
+    "confirmReject": "Decline order #{{id}}?",
+    "decrease": "Decrease",
+    "increase": "Increase",
+    "filter": {
+      "active": "Active",
+      "all": "All",
+      "pending": "Awaiting",
+      "accepted": "Accepted",
+      "cooking": "Cooking",
+      "served": "Served",
+      "closed": "Closed",
+      "rejected": "Declined"
+    },
+    "status": {
+      "pending": "Awaiting confirmation",
+      "accepted": "Accepted",
+      "cooking": "Cooking",
+      "served": "Served",
+      "closed": "Closed",
+      "rejected": "Declined"
+    },
+    "action": {
+      "accepted": "Accept",
+      "rejected": "Decline",
+      "cooking": "Cooking",
+      "served": "Served",
+      "closed": "Close"
+    }
   }
 }

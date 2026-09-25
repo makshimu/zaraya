@@ -15,7 +15,10 @@ export default function SessionBanner({ reason }: { reason: SessionStatus | 'non
   const t = useT()
   if (reason === 'active') return null
   return (
-    <div role="status" className="mx-4 mt-3 flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+    <div
+      role="status"
+      className="mx-4 mt-3 flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-sm text-amber-900"
+    >
       <AlertIcon className="mt-0.5 size-4 shrink-0" />
       {t(MESSAGES[reason] ?? 'rescan')}
     </div>

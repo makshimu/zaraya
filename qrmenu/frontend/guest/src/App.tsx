@@ -1,13 +1,18 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import { tr } from '../../shared/localized'
-import { useMenu, useSession } from './api'
+import { useMenu, useOrders, useSession } from './api'
+import { CartProvider, resolveLines, useCart } from './cart'
+import CartSheet from './components/CartSheet'
 import CategoryStrip, { useActiveCategory } from './components/CategoryStrip'
 import Header from './components/Header'
 import ItemCard from './components/ItemCard'
 import ItemSheet from './components/ItemSheet'
+import OrdersSheet from './components/OrdersSheet'
 import SessionBanner from './components/SessionBanner'
+import { formatMoney } from '../../shared/money'
 import { LangContext, pickLanguage, saveLanguage, translate, useT } from './i18n'
+import { useGuestRealtime } from './realtime'
 import type { GuestItem, GuestMenu, GuestSession } from './types'
 
 // ?error=... comes from the /t/{token} redirect when a QR is invalid
@@ -47,7 +52,9 @@ export default function App() {
 
   return (
     <LangContext.Provider value={{ lang, setLang }}>
-      <MenuScreen menu={menu.data} />
+      <CartProvider>
+        <MenuScreen menu={menu.data} />
+      </CartProvider>
     </LangContext.Provider>
   )
 }
@@ -75,8 +82,12 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
   const { lang } = useContext(LangContext)
   const session = useSession()
   const reason = useSessionState(session.data)
+  const orders = useOrders()
+  useGuestRealtime(session.isSuccess ? (session.data.expires_at ?? null) : undefined)
   const [query, setQuery] = useState('')
   const [openItemId, setOpenItemId] = useState<number | null>(null)
+  const [panel, setPanel] = useState<'cart' | 'orders' | null>(null)
+  const closePanel = useCallback(() => setPanel(null), [])
   const { restaurant } = menu
   const fallback = restaurant.default_language
 
@@ -100,9 +111,14 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
   }, [restaurant.name, lang, fallback])
 
   return (
-    <div className="mx-auto min-h-screen max-w-lg pb-16">
+    <div className="mx-auto min-h-screen max-w-lg pb-28">
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur">
-        <Header restaurant={restaurant} tableNumber={session.data?.table?.number ?? null} query={query} onQuery={setQuery} />
+        <Header
+          restaurant={restaurant}
+          tableNumber={session.data?.table?.number ?? null}
+          query={query}
+          onQuery={setQuery}
+        />
         <CategoryStrip categories={categories} active={active} fallbackLang={fallback} />
       </header>
 
@@ -128,6 +144,30 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
         </section>
       ))}
 
+      <BottomBar
+        menu={menu}
+        ordersCount={orders.data?.length ?? 0}
+        onCart={() => setPanel('cart')}
+        onOrders={() => setPanel('orders')}
+      />
+
+      {panel === 'cart' && (
+        <CartSheet
+          menu={menu}
+          canOrder={reason === 'active'}
+          onClose={closePanel}
+          onOrdered={() => setPanel('orders')}
+        />
+      )}
+      {panel === 'orders' && (
+        <OrdersSheet
+          orders={orders.data ?? []}
+          currency={restaurant.currency}
+          fallbackLang={fallback}
+          onClose={closePanel}
+        />
+      )}
+
       {openItem && (
         <ItemSheet
           item={openItem}
@@ -136,6 +176,51 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
           fallbackLang={fallback}
           onClose={closeSheet}
         />
+      )}
+    </div>
+  )
+}
+
+function BottomBar({
+  menu,
+  ordersCount,
+  onCart,
+  onOrders,
+}: {
+  menu: GuestMenu
+  ordersCount: number
+  onCart: () => void
+  onOrders: () => void
+}) {
+  const t = useT()
+  const { lang } = useContext(LangContext)
+  const cart = useCart()
+  const lines = resolveLines(cart.lines, menu)
+  const count = cart.lines.reduce((n, l) => n + l.quantity, 0)
+  const total = lines.reduce((sum, r) => sum + (r.available ? r.unit * r.line.quantity : 0), 0)
+  if (!count && !ordersCount) return null
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-lg gap-2 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      {ordersCount > 0 && (
+        <button
+          onClick={onOrders}
+          className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 font-semibold shadow-lg"
+        >
+          {t('myOrders')}
+        </button>
+      )}
+      {count > 0 && (
+        <button
+          onClick={onCart}
+          data-testid="cart-bar"
+          className="flex flex-1 items-center justify-between rounded-2xl bg-blue-600 px-5 py-3.5 font-semibold text-white shadow-lg"
+        >
+          <span>
+            {t('cart')} · {count}
+          </span>
+          <span>{formatMoney(total, menu.restaurant.currency, lang)}</span>
+        </button>
       )}
     </div>
   )

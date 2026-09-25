@@ -1,14 +1,16 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, status
+from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Response, WebSocket, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import DB
+from app.api.ws import stream
 from app.core.config import get_settings
 from app.core.security import create_guest_token, decode_guest_token
-from app.models import Category, Item, ModifierGroup, RestaurantSettings, Table, TableSession
+from app.core.db import SessionLocal
+from app.models import Category, Item, ModifierGroup, Order, RestaurantSettings, Table, TableSession
 from app.schemas.guest import (
     GuestCategoryOut,
     GuestItemOut,
@@ -18,7 +20,9 @@ from app.schemas.guest import (
     GuestTableOut,
     RestaurantOut,
 )
-from app.services import media
+from app.schemas.order import OrderIn, OrderOut
+from app.services import media, realtime
+from app.services.orders import ORDER_LOAD, create_order, order_out, staff_order_out
 from app.services.schedule import category_visible, local_now
 from app.services.sessions import SessionStatus, load_session, session_status, start_session
 
@@ -159,3 +163,54 @@ async def get_menu(db: DB) -> GuestMenuOut:
         categories=out_categories,
         modifier_groups=[GuestModifierGroupOut.model_validate(g, from_attributes=True) for g in groups],
     )
+
+
+# --- orders ---
+
+
+@router.post("/orders", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
+async def place_order(
+    body: OrderIn,
+    db: DB,
+    session: ActiveSession,
+    response: Response,
+    idempotency_key: Annotated[str, Header(min_length=8, max_length=64)],
+) -> OrderOut:
+    """Idempotency-Key (one per checkout attempt) makes double taps and retries safe."""
+    order, created = await create_order(db, session, body, idempotency_key)
+    if created:
+        await realtime.publish(
+            realtime.STAFF,
+            {"type": "order.created", "order": staff_order_out(order).model_dump(mode="json")},
+        )
+    else:
+        response.status_code = status.HTTP_200_OK
+    return order_out(order)
+
+
+@router.get("/orders", response_model=list[OrderOut])
+async def my_orders(db: DB, session: OptionalSession) -> list[OrderOut]:
+    """Orders of this phone's visit; still readable after the session expires."""
+    if session is None:
+        return []
+    orders = await db.scalars(
+        select(Order)
+        .where(Order.session_id == session.id)
+        .options(*ORDER_LOAD)
+        .order_by(Order.created_at.desc())
+    )
+    return [order_out(o) for o in orders]
+
+
+@router.websocket("/ws")
+async def guest_ws(ws: WebSocket) -> None:
+    """Menu changes for everyone; order status updates for the phone's own session."""
+    channels = [realtime.MENU]
+    token = ws.cookies.get(COOKIE)
+    session_id = decode_guest_token(token) if token else None
+    if session_id:
+        async with SessionLocal() as db:
+            if await db.get(TableSession, session_id):
+                channels.append(realtime.session_channel(session_id))
+    await ws.accept()
+    await stream(ws, channels)

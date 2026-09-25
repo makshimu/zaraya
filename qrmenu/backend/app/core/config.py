@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "postgresql+asyncpg://qrmenu:qrmenu@localhost:5432/qrmenu"
+    # Tests drive the app from several event loops; pooled asyncpg connections can't cross them
+    database_null_pool: bool = False
     redis_url: str = "redis://localhost:6379/0"
 
     # Public origin guests reach, used inside QR codes: https://example.com

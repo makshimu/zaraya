@@ -65,3 +65,28 @@ export interface GuestSession {
   table: { number: string } | null
   expires_at: string | null
 }
+
+export type OrderStatus = 'pending' | 'accepted' | 'cooking' | 'served' | 'closed' | 'rejected'
+
+export interface GuestOrderItem {
+  id: number
+  item_id: number | null
+  name: Localized
+  price_name: Localized
+  unit_price: number
+  quantity: number
+  total: number
+  comment: string
+  modifiers: { group_name: Localized; name: Localized; price: number }[]
+}
+
+export interface GuestOrder {
+  id: number
+  table_number: string
+  status: OrderStatus
+  comment: string
+  total: number
+  created_at: string
+  updated_at: string
+  items: GuestOrderItem[]
+}

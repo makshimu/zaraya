@@ -1,7 +1,15 @@
 import { useState } from 'react'
 
 /** Lazy image in a fixed box so the layout doesn't jump while it loads on a slow network. */
-export default function Img({ src, className = '', eager = false }: { src?: string; className?: string; eager?: boolean }) {
+export default function Img({
+  src,
+  className = '',
+  eager = false,
+}: {
+  src?: string
+  className?: string
+  eager?: boolean
+}) {
   const [loaded, setLoaded] = useState(false)
   return (
     <div className={`overflow-hidden bg-slate-100 ${className}`}>
