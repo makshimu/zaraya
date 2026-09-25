@@ -10,7 +10,16 @@ from app.api.ws import stream
 from app.core.config import get_settings
 from app.core.security import create_guest_token, decode_guest_token
 from app.core.db import SessionLocal
-from app.models import Category, Item, ModifierGroup, Order, RestaurantSettings, Table, TableSession
+from app.models import (
+    Category,
+    Item,
+    ModifierGroup,
+    Order,
+    RestaurantSettings,
+    ServiceCall,
+    Table,
+    TableSession,
+)
 from app.schemas.guest import (
     GuestCategoryOut,
     GuestItemOut,
@@ -20,8 +29,10 @@ from app.schemas.guest import (
     GuestTableOut,
     RestaurantOut,
 )
+from app.schemas.call import CallIn, GuestCallOut
 from app.schemas.order import OrderIn, OrderOut
 from app.services import media, realtime
+from app.services.hall import create_call, guest_call_out, notify_call
 from app.services.orders import ORDER_LOAD, create_order, order_out, staff_order_out
 from app.services.schedule import category_visible, local_now
 from app.services.sessions import SessionStatus, load_session, session_status, start_session
@@ -44,6 +55,7 @@ async def scan_qr(token: str, db: DB) -> RedirectResponse:
 
     session = await start_session(db, table)
     await db.commit()
+    await realtime.publish(realtime.STAFF, {"type": "table.updated", "table_id": table.id})
 
     settings = get_settings()
     resp = RedirectResponse("/", status.HTTP_303_SEE_OTHER)
@@ -69,12 +81,13 @@ async def optional_session(
 
 
 async def active_session(
-    session: Annotated[TableSession | None, Depends(optional_session)],
+    db: DB, session: Annotated[TableSession | None, Depends(optional_session)]
 ) -> TableSession:
     """For actions that need a live visit: ordering, calling the waiter, asking for the bill."""
     if session is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "session_required")
-    current = session_status(session)
+    settings = await db.get_one(RestaurantSettings, 1)
+    current = session_status(session, settings.require_table_open)
     if current != SessionStatus.active:
         raise HTTPException(status.HTTP_403_FORBIDDEN, f"session_{current.value}")
     return session
@@ -85,11 +98,12 @@ ActiveSession = Annotated[TableSession, Depends(active_session)]
 
 
 @router.get("/session", response_model=GuestSessionOut)
-async def get_session(session: OptionalSession) -> GuestSessionOut:
+async def get_session(db: DB, session: OptionalSession) -> GuestSessionOut:
     if session is None:
         return GuestSessionOut(status=None)
+    settings = await db.get_one(RestaurantSettings, 1)
     return GuestSessionOut(
-        status=session_status(session),
+        status=session_status(session, settings.require_table_open),
         table=GuestTableOut(number=session.table.number),
         expires_at=session.expires_at,
     )
@@ -202,6 +216,29 @@ async def my_orders(db: DB, session: OptionalSession) -> list[OrderOut]:
     return [order_out(o) for o in orders]
 
 
+# --- waiter & bill ---
+
+
+@router.post("/calls", response_model=GuestCallOut, status_code=status.HTTP_201_CREATED)
+async def call_staff(body: CallIn, db: DB, session: ActiveSession) -> GuestCallOut:
+    call = await create_call(db, session, body)
+    await notify_call(call, "call.created")
+    return guest_call_out(call)
+
+
+@router.get("/calls", response_model=list[GuestCallOut])
+async def my_calls(db: DB, session: OptionalSession) -> list[GuestCallOut]:
+    if session is None:
+        return []
+    calls = await db.scalars(
+        select(ServiceCall)
+        .where(ServiceCall.session_id == session.id)
+        .order_by(ServiceCall.created_at.desc())
+        .limit(20)
+    )
+    return [guest_call_out(c) for c in calls]
+
+
 @router.websocket("/ws")
 async def guest_ws(ws: WebSocket) -> None:
     """Menu changes for everyone; order status updates for the phone's own session."""
@@ -210,7 +247,9 @@ async def guest_ws(ws: WebSocket) -> None:
     session_id = decode_guest_token(token) if token else None
     if session_id:
         async with SessionLocal() as db:
-            if await db.get(TableSession, session_id):
+            session = await db.get(TableSession, session_id)
+            if session:
                 channels.append(realtime.session_channel(session_id))
+                channels.append(realtime.table_channel(session.table_id))
     await ws.accept()
     await stream(ws, channels)

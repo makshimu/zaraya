@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { useTranslation } from 'react-i18next'
 
 import { tokenStore } from './api/client'
-import type { Order } from './api/types'
+import type { Order, StaffCall } from './api/types'
 
 interface RealtimeState {
   connected: boolean
@@ -56,19 +56,30 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     let timer: ReturnType<typeof setTimeout> | undefined
     let stopped = false
 
-    const onNewOrder = (order: Order) => {
+    const alert = (title: string, body: string, tag: string) => {
       try {
         chime()
       } catch {
         /* audio blocked until the first click */
       }
       if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden) {
-        new Notification(tRef.current('orders.newOrderTitle', { table: order.table_number }), {
-          body: tRef.current('orders.newOrderBody', { count: order.items.length }),
-          tag: `order-${order.id}`,
-        })
+        new Notification(title, { body, tag })
       }
     }
+    const onNewOrder = (order: Order) =>
+      alert(
+        tRef.current('orders.newOrderTitle', { table: order.table_number }),
+        tRef.current('orders.newOrderBody', { count: order.items.length }),
+        `order-${order.id}`,
+      )
+    const onNewCall = (call: StaffCall) =>
+      alert(
+        tRef.current(`hall.callTitle.${call.type}`, { table: call.table_number }),
+        call.payment_method ? tRef.current(`hall.pay.${call.payment_method}`) : '',
+        `call-${call.id}`,
+      )
+    // Anything about orders, calls or sessions changes the hall screen
+    const invalidateHall = () => ['hall', 'visit', 'calls'].forEach((key) => qc.invalidateQueries({ queryKey: [key] }))
 
     const connect = () => {
       const proto = location.protocol === 'https:' ? 'wss' : 'ws'
@@ -84,10 +95,20 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
             break
           case 'order.created':
             qc.invalidateQueries({ queryKey: ['orders'] })
+            invalidateHall()
             onNewOrder(event.order)
             break
           case 'order.updated':
             qc.invalidateQueries({ queryKey: ['orders'] })
+            invalidateHall()
+            break
+          case 'call.created':
+            invalidateHall()
+            onNewCall(event.call)
+            break
+          case 'call.updated':
+          case 'table.updated':
+            invalidateHall()
             break
           case 'menu.changed':
             qc.invalidateQueries({ queryKey: ['menu'] })

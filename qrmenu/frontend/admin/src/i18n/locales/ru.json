@@ -9,6 +9,7 @@
     "en": "English"
   },
   "nav": {
+    "hall": "Зал",
     "orders": "Заказы",
     "menu": "Меню",
     "tables": "Столы и QR",
@@ -53,7 +54,8 @@
     "invalid_transition": "Статус уже изменился, обновляю",
     "order_not_editable": "Заказ уже готовится — менять нельзя",
     "order_not_found": "Заказ не найден",
-    "order_item_not_found": "Позиция не найдена"
+    "order_item_not_found": "Позиция не найдена",
+    "call_not_found": "Вызов не найден"
   },
   "tables": {
     "title": "Столы и QR",
@@ -198,5 +200,54 @@
       "served": "Подан",
       "closed": "Закрыть"
     }
+  },
+  "hall": {
+    "title": "Зал",
+    "allHalls": "Все залы",
+    "noTables": "Столов пока нет — добавьте их в «Столы и QR»",
+    "state": {
+      "free": "Свободен",
+      "occupied": "Гости",
+      "new_order": "Новый заказ",
+      "waiter": "Зовёт официанта",
+      "bill": "Просит счёт"
+    },
+    "pay": {
+      "cash": "наличные",
+      "card": "карта",
+      "qr": "QR-перевод"
+    },
+    "callTitle": {
+      "waiter": "Стол {{table}} зовёт официанта",
+      "bill": "Стол {{table}} просит счёт"
+    },
+    "callType": {
+      "waiter": "Вызов официанта",
+      "bill": "Запрос счёта"
+    },
+    "orderTitle": "Стол {{table}}: новый заказ №{{id}}",
+    "feed": "Лента событий",
+    "feedEmpty": "Все вызовы обработаны",
+    "take": "Взял",
+    "takenBy": "взял: {{name}}",
+    "justNow": "только что",
+    "minutesAgo_one": "{{count}} мин назад",
+    "minutesAgo_few": "{{count}} мин назад",
+    "minutesAgo_many": "{{count}} мин назад",
+    "minutesAgo_other": "{{count}} мин назад",
+    "opened": "Стол открыт",
+    "guests_one": "{{count}} телефон",
+    "guests_few": "{{count}} телефона",
+    "guests_many": "{{count}} телефонов",
+    "guests_other": "{{count}} телефона",
+    "visitTotal": "сумма визита",
+    "openTable": "Открыть стол",
+    "closeTable": "Закрыть стол",
+    "closeConfirm": "Гости ушли? Их сессии закроются, активные заказы — тоже.",
+    "closeYes": "Да, закрыть",
+    "calls": "Вызовы",
+    "noCalls": "Вызовов не было",
+    "orders": "Заказы визита",
+    "noOrders": "Заказов пока нет"
   }
 }

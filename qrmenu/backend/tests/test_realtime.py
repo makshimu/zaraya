@@ -113,3 +113,34 @@ def test_staff_ws_requires_valid_token(client):
         with client.websocket_connect("/api/admin/ws?token=garbage") as ws:
             ws.receive_json()
     assert exc.value.code == 4401
+
+
+def test_call_waiter_reaches_staff_and_taken_reaches_guest(client):
+    token, auth, _, table = seed(client)
+    client.get(f"/t/{table['token']}")
+    with client.websocket_connect(f"/api/admin/ws?token={token}") as staff:
+        assert staff.receive_json()["type"] == "hello"
+        with guest_ws(client) as guest:
+            assert guest.receive_json()["type"] == "hello"
+            created = client.post("/api/guest/calls", json={"type": "waiter"}).json()
+            event = next_event(staff, "call.created")
+            assert event["call"]["table_number"] == "5"
+            assert event["call"]["type"] == "waiter"
+
+            client.post(f"{API}/calls/{created['id']}/take", headers=auth)
+            # the phone first gets its own new call echoed back, then the "taken" update
+            assert next_event(guest, "call.updated")["call"]["status"] == "open"
+            assert next_event(guest, "call.updated")["call"]["status"] == "taken"
+            assert next_event(staff, "call.updated")["call"]["taken_by"] == "Admin"
+
+
+def test_close_and_open_table_reach_the_phone(client):
+    _, auth, _, table = seed(client)
+    client.get(f"/t/{table['token']}")
+    with guest_ws(client) as guest:
+        assert guest.receive_json()["type"] == "hello"
+        client.post(f"{API}/tables/{table['id']}/open", headers=auth)
+        assert next_event(guest, "session.changed")
+        client.post(f"{API}/tables/{table['id']}/close", headers=auth)
+        assert next_event(guest, "session.changed")
+    assert client.get("/api/guest/session").json()["status"] == "closed"

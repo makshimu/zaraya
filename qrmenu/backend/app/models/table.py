@@ -26,6 +26,8 @@ class Table(Base):
     capacity: Mapped[int] = mapped_column(default=4)
     is_active: Mapped[bool] = mapped_column(default=True)
     token: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    # Set when a waiter seats guests; used when "table must be open" is on. Cleared on close.
+    opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     token_issued_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

@@ -51,5 +51,19 @@
   "errItemUnavailable": "Some dishes are no longer available. Remove them from the cart",
   "errTooMany": "Too many orders this hour. Please call the waiter",
   "errNetwork": "No connection. Check your internet and tap again — the order won't be duplicated",
-  "errUnknown": "Couldn't send the order. Please try again"
+  "errUnknown": "Couldn't send the order. Please try again",
+  "callWaiter": "Call the waiter",
+  "askBill": "Ask for the bill",
+  "waiterCalled": "Waiter called",
+  "billRequested": "Bill requested",
+  "waiterComing": "Waiter is coming",
+  "waiterCalledToast": "A waiter will be with you shortly",
+  "billRequestedToast": "The bill is on its way",
+  "waiterComingToast": "The waiter is on the way",
+  "callCooldown": "Already called. You can call again in {{seconds}} s",
+  "howToPay": "How would you like to pay?",
+  "pay.cash": "Cash",
+  "pay.card": "Card",
+  "pay.qr": "QR transfer",
+  "tableNotOpen": "Ask the waiter to open the table — then you can order"
 }

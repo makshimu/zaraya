@@ -58,7 +58,7 @@ export interface GuestMenu {
   modifier_groups: GuestModifierGroup[]
 }
 
-export type SessionStatus = 'active' | 'expired' | 'closed' | 'table_inactive'
+export type SessionStatus = 'active' | 'expired' | 'closed' | 'table_inactive' | 'table_not_open'
 
 export interface GuestSession {
   status: SessionStatus | null
@@ -89,4 +89,15 @@ export interface GuestOrder {
   created_at: string
   updated_at: string
   items: GuestOrderItem[]
+}
+
+export type CallType = 'waiter' | 'bill'
+export type PaymentMethod = 'cash' | 'card' | 'qr'
+
+export interface GuestCall {
+  id: number
+  type: CallType
+  payment_method: PaymentMethod | null
+  status: 'open' | 'taken'
+  created_at: string
 }

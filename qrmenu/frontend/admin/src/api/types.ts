@@ -179,3 +179,42 @@ export interface Order {
   updated_by: string | null
   items: OrderItem[]
 }
+
+export type CallType = 'waiter' | 'bill'
+export type PaymentMethod = 'cash' | 'card' | 'qr'
+
+export interface StaffCall {
+  id: number
+  type: CallType
+  payment_method: PaymentMethod | null
+  status: 'open' | 'taken'
+  created_at: string
+  table_id: number
+  table_number: string
+  taken_at: string | null
+  taken_by: string | null
+}
+
+// Tile colour on the hall screen, most urgent first
+export type TableState = 'bill' | 'waiter' | 'new_order' | 'occupied' | 'free'
+
+export interface HallTable {
+  id: number
+  number: string
+  hall_id: number | null
+  capacity: number
+  is_active: boolean
+  opened_at: string | null
+  state: TableState
+  guests: number
+  active_orders: number
+  pending_orders: number
+  visit_total: number
+  open_calls: StaffCall[]
+}
+
+export interface TableVisit {
+  table: HallTable
+  orders: Order[]
+  calls: StaffCall[]
+}

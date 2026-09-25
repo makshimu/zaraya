@@ -1,14 +1,16 @@
-import { Bell, BookOpen, LogOut, QrCode, Receipt, Settings } from 'lucide-react'
+import { Bell, BookOpen, LayoutGrid, LogOut, QrCode, Receipt, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router-dom'
 
+import { useOpenCalls } from '../api/hall'
 import { useOrders } from '../api/orders'
 import { useAuth } from '../auth/AuthContext'
 import { useRealtime } from '../realtime'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const NAV = [
-  { to: '/orders', label: 'nav.orders', icon: Receipt, badge: true },
+  { to: '/hall', label: 'nav.hall', icon: LayoutGrid, badge: 'calls' },
+  { to: '/orders', label: 'nav.orders', icon: Receipt, badge: 'pending' },
   { to: '/menu', label: 'nav.menu', icon: BookOpen },
   { to: '/tables', label: 'nav.tables', icon: QrCode },
   { to: '/settings', label: 'nav.settings', icon: Settings, adminOnly: true },
@@ -19,6 +21,8 @@ export default function Layout() {
   const { user, logout } = useAuth()
   const realtime = useRealtime()
   const pending = useOrders({ statuses: ['pending'], tableId: null, date: null }).data?.length ?? 0
+  const calls = useOpenCalls().data?.length ?? 0
+  const badges: Record<string, number> = { pending, calls }
 
   return (
     <div className="flex min-h-screen text-slate-900">
@@ -37,12 +41,12 @@ export default function Layout() {
             >
               <Icon className="size-5" aria-hidden />
               <span className="flex-1">{t(label)}</span>
-              {badge && pending > 0 && (
+              {badge && badges[badge] > 0 && (
                 <span
-                  data-testid="pending-badge"
+                  data-testid={`${badge}-badge`}
                   className="flex size-6 items-center justify-center rounded-full bg-blue-500 text-xs font-semibold text-white"
                 >
-                  {pending}
+                  {badges[badge]}
                 </span>
               )}
             </NavLink>

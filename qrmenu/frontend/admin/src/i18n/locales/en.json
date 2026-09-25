@@ -9,6 +9,7 @@
     "en": "English"
   },
   "nav": {
+    "hall": "Hall",
     "orders": "Orders",
     "menu": "Menu",
     "tables": "Tables & QR",
@@ -53,7 +54,8 @@
     "invalid_transition": "The status has already changed, refreshing",
     "order_not_editable": "The order is already cooking and can't be changed",
     "order_not_found": "Order not found",
-    "order_item_not_found": "Order line not found"
+    "order_item_not_found": "Order line not found",
+    "call_not_found": "Call not found"
   },
   "tables": {
     "title": "Tables & QR",
@@ -194,5 +196,50 @@
       "served": "Served",
       "closed": "Close"
     }
+  },
+  "hall": {
+    "title": "Hall",
+    "allHalls": "All halls",
+    "noTables": "No tables yet — add them under “Tables & QR”",
+    "state": {
+      "free": "Free",
+      "occupied": "Guests",
+      "new_order": "New order",
+      "waiter": "Calling waiter",
+      "bill": "Wants the bill"
+    },
+    "pay": {
+      "cash": "cash",
+      "card": "card",
+      "qr": "QR transfer"
+    },
+    "callTitle": {
+      "waiter": "Table {{table}} is calling the waiter",
+      "bill": "Table {{table}} wants the bill"
+    },
+    "callType": {
+      "waiter": "Waiter call",
+      "bill": "Bill request"
+    },
+    "orderTitle": "Table {{table}}: new order #{{id}}",
+    "feed": "Live feed",
+    "feedEmpty": "All calls handled",
+    "take": "Take",
+    "takenBy": "taken by {{name}}",
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}} min ago",
+    "minutesAgo_other": "{{count}} min ago",
+    "opened": "Table open",
+    "guests_one": "{{count}} phone",
+    "guests_other": "{{count}} phones",
+    "visitTotal": "visit total",
+    "openTable": "Open table",
+    "closeTable": "Close table",
+    "closeConfirm": "Guests left? Their sessions and active orders will be closed.",
+    "closeYes": "Yes, close",
+    "calls": "Calls",
+    "noCalls": "No calls",
+    "orders": "Orders of this visit",
+    "noOrders": "No orders yet"
   }
 }

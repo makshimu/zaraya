@@ -63,7 +63,8 @@ async def clean_db() -> AsyncIterator[None]:
         await conn.execute(
             text(
                 'TRUNCATE "audit_log", "table", "hall", "user", "restaurant_settings", '
-                '"category", "modifier_group", "table_session", "order" RESTART IDENTITY CASCADE'
+                '"category", "modifier_group", "table_session", "order", "service_call" '
+                "RESTART IDENTITY CASCADE"
             )
         )
     async with SessionLocal() as db:

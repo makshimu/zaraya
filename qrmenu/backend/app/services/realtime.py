@@ -29,6 +29,11 @@ def session_channel(session_id: object) -> str:
     return f"session:{session_id}"
 
 
+def table_channel(table_id: int) -> str:
+    """Every phone scanned at the table (e.g. the waiter opened it)."""
+    return f"table:{table_id}"
+
+
 # One client per event loop (a worker has one loop; tests may run several)
 _clients: dict[int, Redis] = {}
 

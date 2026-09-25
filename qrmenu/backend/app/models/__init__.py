@@ -1,4 +1,5 @@
 from app.models.audit import AuditLog
+from app.models.call import CallStatus, CallType, PaymentMethod, ServiceCall
 from app.models.menu import (
     Category,
     Item,
@@ -22,6 +23,10 @@ from app.models.table import Hall, Table
 from app.models.user import User, UserRole
 
 __all__ = [
+    "CallStatus",
+    "CallType",
+    "PaymentMethod",
+    "ServiceCall",
     "ACTIVE_STATUSES",
     "EDITABLE_STATUSES",
     "TRANSITIONS",

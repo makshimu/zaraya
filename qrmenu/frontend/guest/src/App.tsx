@@ -9,7 +9,9 @@ import Header from './components/Header'
 import ItemCard from './components/ItemCard'
 import ItemSheet from './components/ItemSheet'
 import OrdersSheet from './components/OrdersSheet'
-import SessionBanner from './components/SessionBanner'
+import ServiceButtons from './components/ServiceButtons'
+import SessionBanner, { SESSION_MESSAGES } from './components/SessionBanner'
+import Toast from './components/Toast'
 import { formatMoney } from '../../shared/money'
 import { LangContext, pickLanguage, saveLanguage, translate, useT } from './i18n'
 import { useGuestRealtime } from './realtime'
@@ -83,7 +85,13 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
   const session = useSession()
   const reason = useSessionState(session.data)
   const orders = useOrders()
-  useGuestRealtime(session.isSuccess ? (session.data.expires_at ?? null) : undefined)
+  // i18n key explaining why ordering and calls are unavailable right now
+  const blockedReason = reason === 'active' ? null : (SESSION_MESSAGES[reason] ?? 'rescan')
+  const [toast, setToast] = useState<string | null>(null)
+  const clearToast = useCallback(() => setToast(null), [])
+  useGuestRealtime(session.isSuccess ? (session.data.expires_at ?? null) : undefined, (call) => {
+    if (call.status === 'taken') setToast(t('waiterComingToast'))
+  })
   const [query, setQuery] = useState('')
   const [openItemId, setOpenItemId] = useState<number | null>(null)
   const [panel, setPanel] = useState<'cart' | 'orders' | null>(null)
@@ -111,7 +119,7 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
   }, [restaurant.name, lang, fallback])
 
   return (
-    <div className="mx-auto min-h-screen max-w-lg pb-28">
+    <div className="mx-auto min-h-screen max-w-lg pb-44">
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur">
         <Header
           restaurant={restaurant}
@@ -147,14 +155,17 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
       <BottomBar
         menu={menu}
         ordersCount={orders.data?.length ?? 0}
+        blockedReason={blockedReason}
+        notify={setToast}
         onCart={() => setPanel('cart')}
         onOrders={() => setPanel('orders')}
       />
+      {toast && <Toast text={toast} onDone={clearToast} />}
 
       {panel === 'cart' && (
         <CartSheet
           menu={menu}
-          canOrder={reason === 'active'}
+          blockedReason={blockedReason}
           onClose={closePanel}
           onOrdered={() => setPanel('orders')}
         />
@@ -184,11 +195,15 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
 function BottomBar({
   menu,
   ordersCount,
+  blockedReason,
+  notify,
   onCart,
   onOrders,
 }: {
   menu: GuestMenu
   ordersCount: number
+  blockedReason: string | null
+  notify: (text: string) => void
   onCart: () => void
   onOrders: () => void
 }) {
@@ -198,29 +213,32 @@ function BottomBar({
   const lines = resolveLines(cart.lines, menu)
   const count = cart.lines.reduce((n, l) => n + l.quantity, 0)
   const total = lines.reduce((sum, r) => sum + (r.available ? r.unit * r.line.quantity : 0), 0)
-  if (!count && !ordersCount) return null
-
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-lg gap-2 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      {ordersCount > 0 && (
-        <button
-          onClick={onOrders}
-          className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 font-semibold shadow-lg"
-        >
-          {t('myOrders')}
-        </button>
-      )}
-      {count > 0 && (
-        <button
-          onClick={onCart}
-          data-testid="cart-bar"
-          className="flex flex-1 items-center justify-between rounded-2xl bg-blue-600 px-5 py-3.5 font-semibold text-white shadow-lg"
-        >
-          <span>
-            {t('cart')} · {count}
-          </span>
-          <span>{formatMoney(total, menu.restaurant.currency, lang)}</span>
-        </button>
+    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-lg flex-col gap-2 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <ServiceButtons blockedReason={blockedReason} notify={notify} />
+      {(count > 0 || ordersCount > 0) && (
+        <div className="flex gap-2">
+          {ordersCount > 0 && (
+            <button
+              onClick={onOrders}
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 font-semibold shadow-lg"
+            >
+              {t('myOrders')}
+            </button>
+          )}
+          {count > 0 && (
+            <button
+              onClick={onCart}
+              data-testid="cart-bar"
+              className="flex flex-1 items-center justify-between rounded-2xl bg-blue-600 px-5 py-3.5 font-semibold text-white shadow-lg"
+            >
+              <span>
+                {t('cart')} · {count}
+              </span>
+              <span>{formatMoney(total, menu.restaurant.currency, lang)}</span>
+            </button>
+          )}
+        </div>
       )}
     </div>
   )

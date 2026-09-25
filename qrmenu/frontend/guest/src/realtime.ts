@@ -1,13 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import type { GuestOrder } from './types'
+import type { GuestCall, GuestOrder } from './types'
 
 /** Live updates: menu changes and this phone's order statuses. Reconnects with backoff and
  * refetches everything after every (re)connect, so nothing is missed while offline. */
-export function useGuestRealtime(sessionKey: string | null | undefined) {
+export function useGuestRealtime(sessionKey: string | null | undefined, onCall?: (call: GuestCall) => void) {
   const qc = useQueryClient()
   const [connected, setConnected] = useState(false)
+  const onCallRef = useRef(onCall)
+  onCallRef.current = onCall
 
   useEffect(() => {
     // The socket's channels depend on the session cookie: wait until the session is known
@@ -28,6 +30,17 @@ export function useGuestRealtime(sessionKey: string | null | undefined) {
           qc.invalidateQueries()
         } else if (event.type === 'menu.changed') {
           qc.invalidateQueries({ queryKey: ['menu'] })
+        } else if (event.type === 'session.changed') {
+          // The waiter opened or closed the table
+          qc.invalidateQueries({ queryKey: ['session'] })
+        } else if (event.type === 'call.updated') {
+          const call: GuestCall = event.call
+          qc.setQueryData<GuestCall[]>(['calls'], (list) =>
+            list?.some((c) => c.id === call.id)
+              ? list.map((c) => (c.id === call.id ? call : c))
+              : [call, ...(list ?? [])],
+          )
+          onCallRef.current?.(call)
         } else if (event.type === 'order.updated') {
           const order: GuestOrder = event.order
           qc.setQueryData<GuestOrder[]>(['orders'], (list) =>

@@ -26,17 +26,18 @@ const ERRORS: Record<string, string> = {
   session_expired: 'rescan',
   session_closed: 'tableClosed',
   session_table_inactive: 'tableInactive',
+  session_table_not_open: 'tableNotOpen',
   network: 'errNetwork',
 }
 
 export default function CartSheet({
   menu,
-  canOrder,
+  blockedReason,
   onClose,
   onOrdered,
 }: {
   menu: GuestMenu
-  canOrder: boolean
+  blockedReason: string | null // i18n key when ordering isn't possible
   onClose: () => void
   onOrdered: (order: GuestOrder) => void
 }) {
@@ -112,12 +113,12 @@ export default function CartSheet({
                 {t(ERRORS[error.code] ?? 'errUnknown')}
               </p>
             )}
-            {!canOrder && !error && (
-              <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">{t('rescan')}</p>
+            {blockedReason && !error && (
+              <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">{t(blockedReason ?? 'rescan')}</p>
             )}
             <button
               onClick={submit}
-              disabled={busy || !canOrder || !allAvailable}
+              disabled={busy || !!blockedReason || !allAvailable}
               className="flex w-full items-center justify-between rounded-2xl bg-blue-600 px-5 py-4 text-lg font-semibold text-white disabled:bg-slate-300"
             >
               <span>{busy ? t('sending') : t('placeOrder')}</span>
