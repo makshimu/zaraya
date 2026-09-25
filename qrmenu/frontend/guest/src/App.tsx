@@ -18,8 +18,13 @@ import { useGuestRealtime } from './realtime'
 import type { GuestItem, GuestMenu, GuestSession } from './types'
 
 // ?error=... comes from the /t/{token} redirect when a QR is invalid
-const qrError = new URLSearchParams(location.search).get('error')
+const params = new URLSearchParams(location.search)
+const qrError = params.get('error')
 if (qrError) history.replaceState(null, '', '/')
+
+// The admin's live preview embeds the menu with ?preview=1&lang=xx: view only, no ordering
+const preview = params.has('preview')
+const previewLang = params.get('lang')
 
 export default function App() {
   const menu = useMenu()
@@ -28,14 +33,17 @@ export default function App() {
   useEffect(() => {
     if (menu.data && !lang) {
       const r = menu.data.restaurant
-      const picked = pickLanguage(r.languages, r.default_language)
+      const picked =
+        preview && previewLang && r.languages.includes(previewLang)
+          ? previewLang
+          : pickLanguage(r.languages, r.default_language)
       setLangState(picked)
       document.documentElement.lang = picked
     }
   }, [menu.data, lang])
 
   const setLang = useCallback((l: string) => {
-    saveLanguage(l)
+    if (!preview) saveLanguage(l)
     setLangState(l)
   }, [])
 
@@ -130,7 +138,7 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
         <CategoryStrip categories={categories} active={active} fallbackLang={fallback} />
       </header>
 
-      <SessionBanner reason={reason} />
+      {!preview && <SessionBanner reason={reason} />}
 
       {menu.categories.length === 0 && <p className="p-10 text-center text-slate-500">{t('emptyMenu')}</p>}
       {q && categories.length === 0 && <p className="p-10 text-center text-slate-500">{t('nothingFound')}</p>}
@@ -152,14 +160,16 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
         </section>
       ))}
 
-      <BottomBar
-        menu={menu}
-        ordersCount={orders.data?.length ?? 0}
-        blockedReason={blockedReason}
-        notify={setToast}
-        onCart={() => setPanel('cart')}
-        onOrders={() => setPanel('orders')}
-      />
+      {!preview && (
+        <BottomBar
+          menu={menu}
+          ordersCount={orders.data?.length ?? 0}
+          blockedReason={blockedReason}
+          notify={setToast}
+          onCart={() => setPanel('cart')}
+          onOrders={() => setPanel('orders')}
+        />
+      )}
       {toast && <Toast text={toast} onDone={clearToast} />}
 
       {panel === 'cart' && (
@@ -185,6 +195,7 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
           groups={openItem.modifier_group_ids.map((id) => groupsById.get(id)!).filter(Boolean)}
           currency={restaurant.currency}
           fallbackLang={fallback}
+          viewOnly={preview}
           onClose={closeSheet}
         />
       )}

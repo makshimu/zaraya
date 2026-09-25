@@ -10,6 +10,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     public code: string,
+    public detailMessage?: string, // e.g. Telegram's own error text
   ) {
     super(code)
   }
@@ -30,14 +31,18 @@ async function request(path: string, init: RequestInit = {}): Promise<Response> 
   if (resp.status === 401 && token) onUnauthorized()
   if (!resp.ok) {
     let code = 'unknown_error'
+    let message: string | undefined
     try {
       const body = await resp.json()
       if (typeof body.detail === 'string') code = body.detail
-      else if (resp.status === 422) code = 'validation_error'
+      else if (body.detail && typeof body.detail.code === 'string') {
+        code = body.detail.code
+        message = body.detail.message
+      } else if (resp.status === 422) code = 'validation_error'
     } catch {
       /* non-JSON error body */
     }
-    throw new ApiError(resp.status, code)
+    throw new ApiError(resp.status, code, message)
   }
   return resp
 }
@@ -47,7 +52,8 @@ export const api = {
     return (await request(path)).json()
   },
   async post<T>(path: string, body?: unknown): Promise<T> {
-    return (await request(path, { method: 'POST', body: body === undefined ? undefined : JSON.stringify(body) })).json()
+    const resp = await request(path, { method: 'POST', body: body === undefined ? undefined : JSON.stringify(body) })
+    return resp.status === 204 ? (undefined as T) : resp.json()
   },
   async postForm<T>(path: string, form: FormData): Promise<T> {
     return (await request(path, { method: 'POST', body: form })).json()

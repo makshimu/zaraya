@@ -42,6 +42,9 @@ export interface RestaurantSettings {
   session_ttl_minutes: number
   require_first_order_confirmation: boolean
   require_table_open: boolean
+  telegram_enabled: boolean
+  telegram_chat_id: string | null
+  telegram_token_set: boolean // the token itself never comes back
 }
 
 export type Localized = Record<string, string>

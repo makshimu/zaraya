@@ -75,3 +75,6 @@ class RestaurantSettingsOut(BaseModel):
     session_ttl_minutes: int
     require_first_order_confirmation: bool
     require_table_open: bool
+    telegram_enabled: bool
+    telegram_chat_id: str | None
+    telegram_token_set: bool = False  # the token itself is never sent back

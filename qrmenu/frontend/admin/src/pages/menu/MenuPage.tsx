@@ -12,6 +12,7 @@ import { formatMoney } from '../../../../shared/money'
 import CategoryModal from './CategoryModal'
 import GroupModal from './GroupModal'
 import ItemModal from './ItemModal'
+import PhonePreview from './PhonePreview'
 import { useContentLocale } from './shared'
 
 type Editing =
@@ -48,94 +49,113 @@ export default function MenuPage() {
   const canSort = isAdmin && !q
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <h1 className="mb-6 text-3xl font-semibold">{t('menu.title')}</h1>
+    <div className="mx-auto flex max-w-7xl items-start gap-8">
+      <div className="min-w-0 flex-1">
+        <h1 className="mb-6 text-3xl font-semibold">{t('menu.title')}</h1>
 
-      <div className="mb-4 flex gap-1 border-b border-slate-200">
-        {(['menu', 'groups'] as const).map((key) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
-              tab === key ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {t(key === 'menu' ? 'menu.tabMenu' : 'menu.modifierGroups')}
-          </button>
-        ))}
-      </div>
-
-      {tab === 'menu' ? (
-        <>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <label className="relative w-full max-w-xs">
-              <Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-slate-400" />
-              <input
-                type="search"
-                className={`${input} pl-9`}
-                placeholder={t('menu.search')}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </label>
-            {isAdmin && (
-              <button className={btn.primary} onClick={() => setEditing({ kind: 'category', category: null })}>
-                <Plus className="size-4" /> {t('menu.addCategory')}
-              </button>
-            )}
-          </div>
-
-          {data.categories.length === 0 && <Empty text={t('menu.emptyMenu')} />}
-          {q && visibleCategories.length === 0 && <Empty text={t('menu.nothingFound')} />}
-
-          <div className="rounded-2xl border border-slate-200 bg-white">
-            <SortableList
-              ids={visibleCategories.map((c) => c.id)}
-              disabled={!canSort}
-              onReorder={(ids) => reorder.mutate({ scope: { kind: 'categories' }, ids })}
+        <div className="mb-4 flex gap-1 border-b border-slate-200">
+          {(['menu', 'groups'] as const).map((key) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${
+                tab === key ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
             >
-              {visibleCategories.map((category) => (
-                <SortableItem key={category.id} id={category.id} className="border-b border-slate-100 bg-white last:border-0">
-                  <CategoryBlock
-                    category={category}
-                    items={(itemsByCategory.get(category.id) ?? []).filter(matches)}
-                    groupsById={groupsById}
-                    isAdmin={isAdmin}
-                    canSort={canSort}
-                    onEdit={setEditing}
-                  />
-                </SortableItem>
-              ))}
-            </SortableList>
-          </div>
-        </>
-      ) : (
-        <GroupsTab groups={data.modifier_groups} isAdmin={isAdmin} onEdit={(group) => setEditing({ kind: 'group', group })} />
-      )}
+              {t(key === 'menu' ? 'menu.tabMenu' : 'menu.modifierGroups')}
+            </button>
+          ))}
+        </div>
 
-      {editing?.kind === 'category' && <CategoryModal category={editing.category} onClose={() => setEditing(null)} />}
-      {editing?.kind === 'item' && (
-        <ItemModal
-          item={editing.item}
-          categoryId={editing.categoryId}
-          categories={data.categories}
-          groups={data.modifier_groups}
-          onClose={() => setEditing(null)}
-        />
-      )}
-      {editing?.kind === 'group' && <GroupModal group={editing.group} onClose={() => setEditing(null)} />}
+        {tab === 'menu' ? (
+          <>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <label className="relative w-full max-w-xs">
+                <Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-slate-400" />
+                <input
+                  type="search"
+                  className={`${input} pl-9`}
+                  placeholder={t('menu.search')}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </label>
+              {isAdmin && (
+                <button className={btn.primary} onClick={() => setEditing({ kind: 'category', category: null })}>
+                  <Plus className="size-4" /> {t('menu.addCategory')}
+                </button>
+              )}
+            </div>
+
+            {data.categories.length === 0 && <Empty text={t('menu.emptyMenu')} />}
+            {q && visibleCategories.length === 0 && <Empty text={t('menu.nothingFound')} />}
+
+            <div className="rounded-2xl border border-slate-200 bg-white">
+              <SortableList
+                ids={visibleCategories.map((c) => c.id)}
+                disabled={!canSort}
+                onReorder={(ids) => reorder.mutate({ scope: { kind: 'categories' }, ids })}
+              >
+                {visibleCategories.map((category) => (
+                  <SortableItem
+                    key={category.id}
+                    id={category.id}
+                    className="border-b border-slate-100 bg-white last:border-0"
+                  >
+                    <CategoryBlock
+                      category={category}
+                      items={(itemsByCategory.get(category.id) ?? []).filter(matches)}
+                      groupsById={groupsById}
+                      isAdmin={isAdmin}
+                      canSort={canSort}
+                      onEdit={setEditing}
+                    />
+                  </SortableItem>
+                ))}
+              </SortableList>
+            </div>
+          </>
+        ) : (
+          <GroupsTab
+            groups={data.modifier_groups}
+            isAdmin={isAdmin}
+            onEdit={(group) => setEditing({ kind: 'group', group })}
+          />
+        )}
+
+        {editing?.kind === 'category' && <CategoryModal category={editing.category} onClose={() => setEditing(null)} />}
+        {editing?.kind === 'item' && (
+          <ItemModal
+            item={editing.item}
+            categoryId={editing.categoryId}
+            categories={data.categories}
+            groups={data.modifier_groups}
+            onClose={() => setEditing(null)}
+          />
+        )}
+        {editing?.kind === 'group' && <GroupModal group={editing.group} onClose={() => setEditing(null)} />}
+      </div>
+      <aside className="hidden w-[320px] shrink-0 xl:block">
+        <PhonePreview />
+      </aside>
     </div>
   )
 }
 
 function Empty({ text }: { text: string }) {
-  return <div className="mb-4 rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500">{text}</div>
+  return (
+    <div className="mb-4 rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500">{text}</div>
+  )
 }
 
 function Thumb({ url }: { url: string | undefined }) {
   return (
     <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-100 bg-slate-50">
-      {url ? <img src={url} alt="" loading="lazy" className="size-full object-cover" /> : <ImageIcon className="size-5 text-slate-300" />}
+      {url ? (
+        <img src={url} alt="" loading="lazy" className="size-full object-cover" />
+      ) : (
+        <ImageIcon className="size-5 text-slate-300" />
+      )}
     </div>
   )
 }
@@ -166,7 +186,9 @@ function CategoryBlock({
         <DragHandle label={t('menu.drag')} />
         <Thumb url={category.image_urls?.w400} />
         <div className="min-w-0 flex-1">
-          <h2 className={`truncate text-lg font-semibold ${category.is_enabled ? '' : 'text-slate-400'}`}>{content.t(category.name)}</h2>
+          <h2 className={`truncate text-lg font-semibold ${category.is_enabled ? '' : 'text-slate-400'}`}>
+            {content.t(category.name)}
+          </h2>
           {category.available_from && (
             <div className="flex items-center gap-1 text-xs text-slate-500">
               <Clock className="size-3.5" /> {category.available_from.slice(0, 5)}–{category.available_to?.slice(0, 5)}
@@ -181,7 +203,11 @@ function CategoryBlock({
               label={t('menu.enabled')}
               onChange={(is_enabled) => patch.mutate({ id: category.id, is_enabled })}
             />
-            <button className={btn.icon} onClick={() => onEdit({ kind: 'category', category })} aria-label={t('common.edit')}>
+            <button
+              className={btn.icon}
+              onClick={() => onEdit({ kind: 'category', category })}
+              aria-label={t('common.edit')}
+            >
               <Pencil className="size-4" />
             </button>
           </>
@@ -273,7 +299,11 @@ function ItemRow({
       <Status enabled={item.is_enabled} />
       {isAdmin && (
         <>
-          <Toggle checked={item.is_enabled} label={t('menu.enabled')} onChange={(is_enabled) => patch.mutate({ id: item.id, is_enabled })} />
+          <Toggle
+            checked={item.is_enabled}
+            label={t('menu.enabled')}
+            onChange={(is_enabled) => patch.mutate({ id: item.id, is_enabled })}
+          />
           <button
             className={btn.icon}
             onClick={() => onEdit({ kind: 'item', item, categoryId: item.category_id })}
@@ -311,7 +341,11 @@ function GroupsTab({
       )}
       {groups.length === 0 && <Empty text={t('menu.noGroupsYet')} />}
       <div className="space-y-2">
-        <SortableList ids={groups.map((g) => g.id)} disabled={!isAdmin} onReorder={(ids) => reorder.mutate({ scope: { kind: 'groups' }, ids })}>
+        <SortableList
+          ids={groups.map((g) => g.id)}
+          disabled={!isAdmin}
+          onReorder={(ids) => reorder.mutate({ scope: { kind: 'groups' }, ids })}
+        >
           {groups.map((g) => (
             <SortableItem key={g.id} id={g.id} className="rounded-xl border border-slate-200 bg-white">
               <div className="flex items-start gap-3 p-4" data-testid="group">

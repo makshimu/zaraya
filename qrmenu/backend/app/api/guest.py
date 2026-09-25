@@ -31,7 +31,7 @@ from app.schemas.guest import (
 )
 from app.schemas.call import CallIn, GuestCallOut
 from app.schemas.order import OrderIn, OrderOut
-from app.services import media, realtime
+from app.services import media, realtime, telegram
 from app.services.hall import create_call, guest_call_out, notify_call
 from app.services.orders import ORDER_LOAD, create_order, order_out, staff_order_out
 from app.services.schedule import category_visible, local_now
@@ -197,6 +197,8 @@ async def place_order(
             realtime.STAFF,
             {"type": "order.created", "order": staff_order_out(order).model_dump(mode="json")},
         )
+        settings = await db.get_one(RestaurantSettings, 1)
+        telegram.notify(settings, telegram.order_text(order, settings))
     else:
         response.status_code = status.HTTP_200_OK
     return order_out(order)
@@ -223,6 +225,8 @@ async def my_orders(db: DB, session: OptionalSession) -> list[OrderOut]:
 async def call_staff(body: CallIn, db: DB, session: ActiveSession) -> GuestCallOut:
     call = await create_call(db, session, body)
     await notify_call(call, "call.created")
+    settings = await db.get_one(RestaurantSettings, 1)
+    telegram.notify(settings, telegram.call_text(call, settings))
     return guest_call_out(call)
 
 

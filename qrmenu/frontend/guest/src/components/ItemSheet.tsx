@@ -16,12 +16,14 @@ export default function ItemSheet({
   groups,
   currency,
   fallbackLang,
+  viewOnly = false,
   onClose,
 }: {
   item: GuestItem
   groups: GuestModifierGroup[]
   currency: string
   fallbackLang: string
+  viewOnly?: boolean // admin preview: no cart
   onClose: () => void
 }) {
   const t = useT()
@@ -55,14 +57,16 @@ export default function ItemSheet({
       label={l(item.name)}
       onClose={onClose}
       footer={
-        <button
-          onClick={addToCart}
-          disabled={!canAdd}
-          className="flex w-full items-center justify-between rounded-2xl bg-blue-600 px-5 py-4 text-lg font-semibold text-white disabled:bg-slate-300"
-        >
-          <span>{item.is_available ? t('addToCart') : t('outOfStock')}</span>
-          <span data-testid="total">{money(total)}</span>
-        </button>
+        !viewOnly && (
+          <button
+            onClick={addToCart}
+            disabled={!canAdd}
+            className="flex w-full items-center justify-between rounded-2xl bg-blue-600 px-5 py-4 text-lg font-semibold text-white disabled:bg-slate-300"
+          >
+            <span>{item.is_available ? t('addToCart') : t('outOfStock')}</span>
+            <span data-testid="total">{money(total)}</span>
+          </button>
+        )
       }
     >
       {item.image_urls && <Img src={item.image_urls.w1200} eager className="aspect-[4/3] w-full" />}

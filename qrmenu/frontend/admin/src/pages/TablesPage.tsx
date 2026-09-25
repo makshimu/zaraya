@@ -1,10 +1,11 @@
-import { Check, Copy, Download, Pencil, Plus, RefreshCw, Trash2, Users } from 'lucide-react'
+import { Check, Copy, Download, FileDown, Pencil, Plus, RefreshCw, Trash2, Users } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ApiError } from '../api/client'
 import {
   downloadQr,
+  downloadQrPdf,
   useDeleteHall,
   useDeleteTable,
   useHalls,
@@ -21,7 +22,8 @@ import { btn, input, label } from '../components/ui'
 
 function useErrorText() {
   const { t } = useTranslation()
-  return (err: unknown) => t(`errors.${err instanceof ApiError ? err.code : 'unknown_error'}`, t('errors.unknown_error'))
+  return (err: unknown) =>
+    t(`errors.${err instanceof ApiError ? err.code : 'unknown_error'}`, t('errors.unknown_error'))
 }
 
 export default function TablesPage() {
@@ -51,7 +53,10 @@ export default function TablesPage() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-semibold">{t('tables.title')}</h1>
         {isAdmin && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <button className={btn.secondary} onClick={() => downloadQrPdf()} disabled={!tables.data?.length}>
+              <FileDown className="size-4" /> {t('tables.printPdf')}
+            </button>
             <button className={btn.secondary} onClick={() => setHallEditing('new')}>
               <Plus className="size-4" /> {t('tables.addHall')}
             </button>
@@ -80,8 +85,18 @@ export default function TablesPage() {
                   </button>
                   <button
                     className={btn.icon}
+                    aria-label={t('tables.printHallPdf')}
+                    title={t('tables.printHallPdf')}
+                    onClick={() => downloadQrPdf(hall.id)}
+                  >
+                    <FileDown className="size-4" />
+                  </button>
+                  <button
+                    className={btn.icon}
                     aria-label={t('common.delete')}
-                    onClick={() => confirm(t('common.confirmDelete', { name: hall.name })) && deleteHall.mutate(hall.id)}
+                    onClick={() =>
+                      confirm(t('common.confirmDelete', { name: hall.name })) && deleteHall.mutate(hall.id)
+                    }
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -153,7 +168,14 @@ function HallModal({ hall, onClose }: { hall: Hall | null; onClose: () => void }
           <label className={label} htmlFor="hall-name">
             {t('tables.hallName')}
           </label>
-          <input id="hall-name" className={input} required value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+          <input
+            id="hall-name"
+            className={input}
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+          />
         </div>
         {save.error && <p className="text-sm text-red-600">{errorText(save.error)}</p>}
         <div className="flex justify-end gap-2">
@@ -195,14 +217,15 @@ function TableModal({
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    save.mutate(
-      { id: table?.id, data: form },
-      { onSuccess: (saved) => (table ? onClose() : onCreated(saved)) },
-    )
+    save.mutate({ id: table?.id, data: form }, { onSuccess: (saved) => (table ? onClose() : onCreated(saved)) })
   }
 
   return (
-    <Modal title={table ? t('tables.editTable', { number: table.number }) : t('tables.newTable')} onClose={onClose} wide={!!table}>
+    <Modal
+      title={table ? t('tables.editTable', { number: table.number }) : t('tables.newTable')}
+      onClose={onClose}
+      wide={!!table}
+    >
       <div className={table ? 'grid gap-6 md:grid-cols-2' : ''}>
         <form onSubmit={submit} className="space-y-4">
           <fieldset disabled={readOnly} className="space-y-4">
@@ -333,7 +356,9 @@ function QrPanel({ table, readOnly }: { table: Table; readOnly: boolean }) {
           <button
             className={btn.danger}
             disabled={regenerate.isPending}
-            onClick={() => confirm(t('tables.regenerateConfirm', { number: table.number })) && regenerate.mutate(table.id)}
+            onClick={() =>
+              confirm(t('tables.regenerateConfirm', { number: table.number })) && regenerate.mutate(table.id)
+            }
           >
             <RefreshCw className="size-4" /> {t('tables.regenerate')}
           </button>

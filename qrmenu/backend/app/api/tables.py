@@ -6,10 +6,11 @@ from sqlalchemy.exc import IntegrityError
 
 from app.api.deps import DB, AdminUser, CurrentUser
 from app.core.security import new_table_token
-from app.models import Hall, Table
+from app.models import Hall, RestaurantSettings, Table
 from app.schemas import HallIn, HallOut, TableIn, TableOut, TableUpdate
 from app.services.audit import audit
 from app.services.qr import render_qr, table_url
+from app.services.qr_pdf import render_tables_pdf
 
 router = APIRouter(tags=["tables"])
 
@@ -92,6 +93,21 @@ async def delete_hall(hall_id: int, db: DB, user: AdminUser) -> None:
 async def list_tables(db: DB, _: CurrentUser) -> list[TableOut]:
     tables = await db.scalars(select(Table).order_by(Table.hall_id, Table.number))
     return [table_out(t) for t in tables]
+
+
+@router.get("/tables/qr.pdf")
+async def tables_pdf(db: DB, _: AdminUser, hall_id: int | None = None) -> Response:
+    """All active tables (optionally of one hall) on A4 cards for printing."""
+    query = select(Table).where(Table.is_active).order_by(Table.hall_id, Table.number)
+    if hall_id is not None:
+        query = query.where(Table.hall_id == hall_id)
+    tables = list(await db.scalars(query))
+    settings = await db.get_one(RestaurantSettings, 1)
+    return Response(
+        render_tables_pdf(tables, settings),
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="tables-qr.pdf"'},
+    )
 
 
 @router.post("/tables", response_model=TableOut, status_code=status.HTTP_201_CREATED)

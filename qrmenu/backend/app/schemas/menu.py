@@ -215,6 +215,10 @@ class RestaurantSettingsIn(BaseModel):
     session_ttl_minutes: int = Field(ge=1, le=24 * 60)
     require_first_order_confirmation: bool
     require_table_open: bool
+    telegram_enabled: bool = False
+    telegram_chat_id: str | None = Field(default=None, pattern=r"^(-?\d{1,20}|@[A-Za-z0-9_]{5,32})$")
+    # None keeps the stored token, "" removes it
+    telegram_bot_token: str | None = Field(default=None, pattern=r"^(|\d{5,15}:[A-Za-z0-9_-]{30,64})$")
 
     @model_validator(mode="after")
     def check(self):

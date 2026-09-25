@@ -9,7 +9,8 @@ export const useTables = () => useQuery({ queryKey: ['tables'], queryFn: () => a
 
 function useInvalidate() {
   const qc = useQueryClient()
-  return () => Promise.all([qc.invalidateQueries({ queryKey: ['halls'] }), qc.invalidateQueries({ queryKey: ['tables'] })])
+  return () =>
+    Promise.all([qc.invalidateQueries({ queryKey: ['halls'] }), qc.invalidateQueries({ queryKey: ['tables'] })])
 }
 
 export function useSaveHall() {
@@ -65,11 +66,21 @@ export function useQrImage(table: Table) {
   return url
 }
 
-export async function downloadQr(table: Table, fmt: 'png' | 'svg') {
-  const blob = await api.blob(`/tables/${table.id}/qr.${fmt}`)
+function saveBlob(blob: Blob, filename: string) {
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = `table-${table.number}.${fmt}`
+  a.download = filename
   a.click()
-  URL.revokeObjectURL(a.href)
+  // Revoking right away can cancel the download in some browsers
+  setTimeout(() => URL.revokeObjectURL(a.href), 10_000)
+}
+
+export async function downloadQr(table: Table, fmt: 'png' | 'svg') {
+  saveBlob(await api.blob(`/tables/${table.id}/qr.${fmt}`), `table-${table.number}.${fmt}`)
+}
+
+/** A4 sheets with a card per active table, ready to print and cut. */
+export async function downloadQrPdf(hallId?: number) {
+  const query = hallId === undefined ? '' : `?hall_id=${hallId}`
+  saveBlob(await api.blob(`/tables/qr.pdf${query}`), 'tables-qr.pdf')
 }

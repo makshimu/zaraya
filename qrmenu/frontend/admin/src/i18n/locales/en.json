@@ -14,7 +14,8 @@
     "menu": "Menu",
     "tables": "Tables & QR",
     "logout": "Log out",
-    "settings": "Settings"
+    "settings": "Settings",
+    "users": "Users"
   },
   "roles": {
     "admin": "Administrator",
@@ -55,7 +56,12 @@
     "order_not_editable": "The order is already cooking and can't be changed",
     "order_not_found": "Order not found",
     "order_item_not_found": "Order line not found",
-    "call_not_found": "Call not found"
+    "call_not_found": "Call not found",
+    "telegram_not_configured": "Telegram needs a bot token and a chat id",
+    "telegram_error": "Telegram error",
+    "email_taken": "A user with this email already exists",
+    "last_admin": "The last administrator can't be removed",
+    "user_not_found": "User not found"
   },
   "tables": {
     "title": "Tables & QR",
@@ -81,7 +87,9 @@
     "regenerated": "QR reissued",
     "issuedAt": "Issued {{date}}",
     "copyLink": "Copy link",
-    "copied": "Copied"
+    "copied": "Copied",
+    "printPdf": "Printable PDF",
+    "printHallPdf": "PDF for this hall"
   },
   "menu": {
     "title": "My digital menu",
@@ -125,7 +133,10 @@
     "surcharge": "Surcharge",
     "drag": "Drag",
     "confirmDeleteCategory": "Delete category “{{name}}” with all its dishes?",
-    "confirmDeleteGroup": "Delete group “{{name}}”? It will be removed from all dishes."
+    "confirmDeleteGroup": "Delete group “{{name}}”? It will be removed from all dishes.",
+    "preview": "Guest view",
+    "previewLanguage": "Preview language",
+    "previewReload": "Reload preview"
   },
   "badges": {
     "spicy": "Spicy",
@@ -151,7 +162,17 @@
     "confirmFirstOrderHint": "Protects against orders from a photographed QR.",
     "requireOpen": "Table must be opened by a waiter",
     "requireOpenHint": "Orders are only possible after a waiter opens the table when seating guests.",
-    "saved": "Saved"
+    "saved": "Saved",
+    "telegram": "Telegram notifications",
+    "telegramHint": "New orders, waiter calls and bill requests are mirrored to the staff chat. Create a bot with @BotFather, add it to the chat and enter the chat id (e.g. from @getidsbot).",
+    "telegramEnabled": "Send events to Telegram",
+    "telegramToken": "Bot token",
+    "telegramTokenSaved": "saved — type a new one to replace it",
+    "telegramChat": "Chat ID",
+    "telegramTest": "Send a test message",
+    "telegramSaveFirst": "Save the token and chat first",
+    "telegramTestOk": "Sent — check the chat",
+    "telegramTestFailed": "Telegram returned an error: {{error}}"
   },
   "realtime": {
     "online": "Online",
@@ -241,5 +262,25 @@
     "noCalls": "No calls",
     "orders": "Orders of this visit",
     "noOrders": "No orders yet"
+  },
+  "users": {
+    "title": "Users",
+    "add": "Add staff member",
+    "hint": "Waiters see the hall and orders but can't edit the menu or settings. A blocked user is signed out at once.",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "you": "you",
+    "active": "Active",
+    "blocked": "Blocked",
+    "password": "Password (at least 6 characters)",
+    "newPassword": "New password",
+    "keepPassword": "leave empty to keep it",
+    "canSignIn": "Can sign in",
+    "roleHint": {
+      "waiter": "Hall, orders, calls, opening and closing tables",
+      "admin": "Everything, including menu, tables, users and settings"
+    }
   }
 }

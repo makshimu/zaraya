@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from redis.asyncio import Redis
 from sqlalchemy import text
 
-from app.api import auth, guest, hall, menu, orders, settings, tables
+from app.api import auth, guest, hall, menu, orders, settings, tables, users
 from app.core.config import get_settings
 from app.core.db import SessionLocal
 from app.services.realtime import hub
@@ -36,6 +36,7 @@ admin.include_router(tables.router)
 admin.include_router(menu.router)
 admin.include_router(orders.router)
 admin.include_router(hall.router)
+admin.include_router(users.router)
 app.include_router(admin)
 app.include_router(guest.router)
 app.include_router(guest.qr_router)

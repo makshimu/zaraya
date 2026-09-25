@@ -9,6 +9,7 @@ import MenuPage from './pages/menu/MenuPage'
 import OrdersPage from './pages/OrdersPage'
 import SettingsPage from './pages/SettingsPage'
 import TablesPage from './pages/TablesPage'
+import UsersPage from './pages/UsersPage'
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/tables" element={<TablesPage />} />
+          {user.role === 'admin' && <Route path="/users" element={<UsersPage />} />}
           {user.role === 'admin' && <Route path="/settings" element={<SettingsPage />} />}
           <Route path="*" element={<Navigate to="/hall" replace />} />
         </Route>

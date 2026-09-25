@@ -66,7 +66,7 @@ export default function GroupModal({ group, onClose }: { group: ModifierGroup | 
               type="number"
               min={0}
               max={50}
-              className={`${input} w-24`}
+              className={input.replace('w-full', 'w-24')}
               value={form.min_select}
               onChange={(e) => {
                 const min = Number(e.target.value)
@@ -83,7 +83,7 @@ export default function GroupModal({ group, onClose }: { group: ModifierGroup | 
               type="number"
               min={1}
               max={50}
-              className={`${input} w-24`}
+              className={input.replace('w-full', 'w-24')}
               value={form.max_select}
               onChange={(e) => setForm({ ...form, max_select: Number(e.target.value) })}
             />

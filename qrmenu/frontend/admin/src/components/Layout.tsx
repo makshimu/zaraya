@@ -1,4 +1,4 @@
-import { Bell, BookOpen, LayoutGrid, LogOut, QrCode, Receipt, Settings } from 'lucide-react'
+import { Bell, BookOpen, LayoutGrid, LogOut, QrCode, Receipt, Settings, UserCog } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router-dom'
 
@@ -13,6 +13,7 @@ const NAV = [
   { to: '/orders', label: 'nav.orders', icon: Receipt, badge: 'pending' },
   { to: '/menu', label: 'nav.menu', icon: BookOpen },
   { to: '/tables', label: 'nav.tables', icon: QrCode },
+  { to: '/users', label: 'nav.users', icon: UserCog, adminOnly: true },
   { to: '/settings', label: 'nav.settings', icon: Settings, adminOnly: true },
 ]
 

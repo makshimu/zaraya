@@ -1,8 +1,9 @@
-import { Check, X } from 'lucide-react'
+import { Check, Send, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useSaveSettings, useSettings, type SettingsInput } from '../api/settings'
+import { ApiError } from '../api/client'
+import { testTelegram, useSaveSettings, useSettings, type SettingsInput } from '../api/settings'
 import type { RestaurantSettings } from '../api/types'
 import ImagePicker from '../components/ImagePicker'
 import LocalizedField from '../components/LocalizedField'
@@ -16,13 +17,14 @@ export default function SettingsPage() {
   return <SettingsForm initial={settings.data} />
 }
 
-const TIMEZONES: string[] = (Intl as unknown as { supportedValuesOf?: (k: string) => string[] }).supportedValuesOf?.('timeZone') ?? []
+const TIMEZONES: string[] =
+  (Intl as unknown as { supportedValuesOf?: (k: string) => string[] }).supportedValuesOf?.('timeZone') ?? []
 
 function SettingsForm({ initial }: { initial: RestaurantSettings }) {
   const { t } = useTranslation()
   const errorText = useErrorText()
   const save = useSaveSettings()
-  const { logo_urls, ...rest } = initial
+  const { logo_urls, telegram_token_set, ...rest } = initial
   const [form, setForm] = useState<SettingsInput>(rest)
   const [logoUrl, setLogoUrl] = useState(logo_urls?.w400 ?? null)
   const [newLang, setNewLang] = useState('')
@@ -41,7 +43,12 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    save.mutate(form, { onSuccess: () => setSaved(true) })
+    save.mutate(form, {
+      onSuccess: () => {
+        setSaved(true)
+        setForm((f) => ({ ...f, telegram_bot_token: undefined }))
+      },
+    })
   }
 
   return (
@@ -75,7 +82,7 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
             </label>
             <input
               id="currency"
-              className={`${input} w-28 uppercase`}
+              className={`${input.replace('w-full', 'w-28')} uppercase`}
               required
               pattern="[A-Za-z]{3}"
               maxLength={3}
@@ -87,7 +94,14 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
             <label className={label} htmlFor="tz">
               {t('settings.timezone')}
             </label>
-            <input id="tz" list="tz-list" className={input} required value={form.timezone} onChange={(e) => set({ timezone: e.target.value })} />
+            <input
+              id="tz"
+              list="tz-list"
+              className={input}
+              required
+              value={form.timezone}
+              onChange={(e) => set({ timezone: e.target.value })}
+            />
             <datalist id="tz-list">
               {TIMEZONES.map((z) => (
                 <option key={z} value={z} />
@@ -128,7 +142,7 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
             <input
               aria-label={t('settings.addLanguage')}
               placeholder="vi"
-              className={`${input} w-20`}
+              className={input.replace('w-full', 'w-20')}
               value={newLang}
               onChange={(e) => setNewLang(e.target.value)}
               onKeyDown={(e) => {
@@ -157,7 +171,7 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
             min={1}
             max={1440}
             required
-            className={`${input} w-32`}
+            className={input.replace('w-full', 'w-32')}
             value={form.session_ttl_minutes}
             onChange={(e) => set({ session_ttl_minutes: Number(e.target.value) })}
           />
@@ -189,6 +203,8 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
         </label>
       </section>
 
+      <TelegramSection form={form} set={set} tokenSet={telegram_token_set} />
+
       {save.error && <p className="text-sm text-red-600">{errorText(save.error)}</p>}
       <div className="flex items-center justify-end gap-3">
         {saved && (
@@ -201,5 +217,83 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
         </button>
       </div>
     </form>
+  )
+}
+
+function TelegramSection({
+  form,
+  set,
+  tokenSet,
+}: {
+  form: SettingsInput
+  set: (patch: Partial<SettingsInput>) => void
+  tokenSet: boolean
+}) {
+  const { t } = useTranslation()
+  const [test, setTest] = useState<{ ok: boolean; text: string } | null>(null)
+  const [testing, setTesting] = useState(false)
+
+  async function runTest() {
+    setTesting(true)
+    setTest(null)
+    try {
+      await testTelegram()
+      setTest({ ok: true, text: t('settings.telegramTestOk') })
+    } catch (err) {
+      const message = err instanceof ApiError ? (err.detailMessage ?? t(`errors.${err.code}`, err.code)) : ''
+      setTest({ ok: false, text: t('settings.telegramTestFailed', { error: message || t('errors.unknown_error') }) })
+    } finally {
+      setTesting(false)
+    }
+  }
+
+  return (
+    <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
+      <h2 className="font-semibold">{t('settings.telegram')}</h2>
+      <p className="text-sm text-slate-500">{t('settings.telegramHint')}</p>
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={form.telegram_enabled}
+          onChange={(e) => set({ telegram_enabled: e.target.checked })}
+        />
+        {t('settings.telegramEnabled')}
+      </label>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <label className={label} htmlFor="tg-token">
+            {t('settings.telegramToken')}
+          </label>
+          <input
+            id="tg-token"
+            type="password"
+            autoComplete="off"
+            className={input}
+            placeholder={tokenSet ? t('settings.telegramTokenSaved') : '123456789:AA…'}
+            value={form.telegram_bot_token ?? ''}
+            onChange={(e) => set({ telegram_bot_token: e.target.value || undefined })}
+          />
+        </div>
+        <div>
+          <label className={label} htmlFor="tg-chat">
+            {t('settings.telegramChat')}
+          </label>
+          <input
+            id="tg-chat"
+            className={input}
+            placeholder="-1001234567890"
+            value={form.telegram_chat_id ?? ''}
+            onChange={(e) => set({ telegram_chat_id: e.target.value.trim() || null })}
+          />
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="button" className={btn.secondary} disabled={testing || !tokenSet} onClick={runTest}>
+          <Send className="size-4" /> {t('settings.telegramTest')}
+        </button>
+        {!tokenSet && <span className="text-sm text-slate-500">{t('settings.telegramSaveFirst')}</span>}
+        {test && <span className={`text-sm ${test.ok ? 'text-green-600' : 'text-red-600'}`}>{test.text}</span>}
+      </div>
+    </section>
   )
 }

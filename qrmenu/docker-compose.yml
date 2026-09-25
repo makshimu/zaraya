@@ -73,6 +73,26 @@ services:
       - api
       - web
 
+  # Daily pg_dump into the "backups" volume, 14 days kept.
+  # Run one now: docker compose exec backup /backup.sh once
+  backup:
+    <<: *restart
+    image: postgres:16-alpine
+    entrypoint: ["/backup.sh"]
+    environment:
+      PGHOST: postgres
+      PGUSER: qrmenu
+      PGPASSWORD: ${POSTGRES_PASSWORD:-qrmenu}
+      PGDATABASE: qrmenu
+      BACKUP_TIME: ${BACKUP_TIME:-03:30}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+    volumes:
+      - ./backup/backup.sh:/backup.sh:ro
+      - backups:/backups
+    depends_on:
+      postgres: { condition: service_healthy }
+
   # docker compose --profile test run --rm api-test
   api-test:
     profiles: ["test"]
@@ -92,5 +112,6 @@ services:
 volumes:
   pgdata:
   media:
+  backups:
   caddy_data:
   caddy_config:

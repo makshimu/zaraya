@@ -21,3 +21,7 @@ class RestaurantSettings(Base):
     session_ttl_minutes: Mapped[int] = mapped_column(default=180)
     require_first_order_confirmation: Mapped[bool] = mapped_column(default=True)
     require_table_open: Mapped[bool] = mapped_column(default=False)
+    # Staff chat in Telegram that mirrors new orders and calls
+    telegram_enabled: Mapped[bool] = mapped_column(default=False)
+    telegram_bot_token: Mapped[str | None] = mapped_column(String(128))  # write-only in the API
+    telegram_chat_id: Mapped[str | None] = mapped_column(String(64))

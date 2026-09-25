@@ -9,26 +9,69 @@
 - [x] **3. Гостевое меню:** скан QR → сессия стола (по умолчанию 3 ч), истечение сессии, экран блюда с вариантами и модификаторами; экран настроек в админке
 - [x] **4. Корзина и заказ:** цена считается только на бэкенде, Idempotency-Key, статусы, правка позиций до «готовится», лента заказов в админке в реальном времени (WebSocket + Redis) со звуком и уведомлениями
 - [x] **5. Зал:** вызов официанта и запрос счёта (наличные / карта / QR), экран «Зал» с цветами столов и лентой событий, «Взял», открытие и закрытие стола, подтверждение первого заказа, «стол должен быть открыт»
-- [ ] 6. Превью, PDF с QR, Telegram, бэкапы, e2e
+- [x] **6. Финиш:** живое превью меню в админке, PDF с QR для печати, уведомления в Telegram, ежедневные бэкапы, e2e-тесты, экран «Пользователи»
 
-## Запуск
+## Запуск на своём компьютере
+
+Нужны Docker (Docker Desktop) и git.
 
 ```bash
-cp .env.example .env   # задайте JWT_SECRET, POSTGRES_PASSWORD, ADMIN_PASSWORD, DOMAIN
+git clone https://github.com/makshimu/zaraya.git
+cd zaraya/qrmenu
+cp .env.example .env
 docker compose up -d --build
 ```
 
-- Гостевое меню: `https://<DOMAIN>/` (гость попадает туда по QR `https://<DOMAIN>/t/<token>`)
-- Админка: `https://<DOMAIN>/admin/` (для `localhost` у Caddy свой локальный сертификат, браузер попросит подтвердить)
-- API docs: `https://<DOMAIN>/api/docs`, healthcheck: `/api/health`
-- Первый админ создаётся из `ADMIN_EMAIL` / `ADMIN_PASSWORD` при первом старте на пустой БД.
-- Миграции Alembic применяются автоматически при старте `api`.
+- Админка: `https://localhost/admin/`, вход — `ADMIN_EMAIL` / `ADMIN_PASSWORD` из `.env` (по умолчанию `admin@example.com` / `admin`). Для `localhost` Caddy выпускает свой сертификат — браузер попросит подтвердить.
+- Гостевое меню: откройте ссылку стола из «Столы и QR» (`https://localhost/t/<token>`). Мобильный вид — режим телефона в DevTools.
+- API docs: `https://localhost/api/docs`, healthcheck: `/api/health`.
+- Миграции применяются сами при старте `api`; первый админ создаётся на пустой базе.
+
+## Выкладка на сервер
+
+1. VPS с Docker (1 vCPU / 1–2 GB RAM хватит) и домен, A-запись которого указывает на сервер. Порты 80 и 443 открыты.
+2. На сервере:
+   ```bash
+   git clone https://github.com/makshimu/zaraya.git && cd zaraya/qrmenu
+   cp .env.example .env
+   ```
+3. В `.env`: `DOMAIN=menu.example.com`, `PUBLIC_BASE_URL=https://menu.example.com`, свои `POSTGRES_PASSWORD`, `ADMIN_PASSWORD` и `JWT_SECRET` (`openssl rand -hex 32`).
+4. `docker compose up -d --build` — Caddy сам получит сертификат Let's Encrypt.
+5. В админке: настройки → меню → столы → «PDF для печати».
+
+Обновление: `git pull && docker compose up -d --build`.
 
 ## Тесты
 
 ```bash
+# API (pytest, отдельная тестовая БД)
 docker compose --profile test run --rm api-test
+
+# e2e (Playwright) против запущенного стека: сценарии приёмки из ТЗ
+cd e2e && npm ci && npx playwright install chromium
+E2E_BASE_URL=https://localhost ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=admin npx playwright test
 ```
+
+e2e-тесты создают свои стол, категорию и блюда с уникальной меткой и удаляют их после себя; настройки ресторана возвращаются как были. Тест TTL ждёт реальную минуту.
+
+## Бэкапы
+
+Сервис `backup` каждый день в `BACKUP_TIME` (часовой пояс `TZ`) делает `pg_dump` в volume `backups` и удаляет дампы старше `BACKUP_KEEP_DAYS` (14).
+
+```bash
+docker compose exec backup /backup.sh once        # бэкап прямо сейчас
+docker compose exec backup ls -lh /backups        # список
+# восстановление (остановите api, чтобы никто не писал в базу)
+docker compose stop api
+docker compose exec backup pg_restore --clean --if-exists -d qrmenu /backups/qrmenu-YYYYMMDD-HHMMSS.dump
+docker compose start api
+```
+
+Фото блюд лежат в volume `media` — его копируйте отдельно (например, `docker run --rm -v qrmenu_media:/m -v $PWD:/out alpine tar czf /out/media.tgz -C /m .`).
+
+## Уведомления в Telegram
+
+Настройки → «Уведомления в Telegram»: токен бота от @BotFather и id чата персонала (бота нужно добавить в этот чат). Кнопка «Отправить тестовое сообщение» показывает ошибку Telegram, если что-то не так. Новые заказы, вызовы официанта и запросы счёта дублируются в чат; токен в ответах API не возвращается.
 
 ## Структура
 
@@ -43,7 +86,9 @@ frontend/
   guest/      мобильное меню гостя (React + Tailwind + TanStack Query, без тяжёлых библиотек), i18n в src/locales
   shared/     общий код: деньги, выбор перевода
   Dockerfile  собирает фронт и отдаёт его через nginx
-caddy/        Caddyfile: /api → api, остальное → web, HTTPS автоматически
+caddy/        Caddyfile: /api и /t → api, /media — файлы, остальное → web; HTTPS автоматически
+backup/       скрипт ежедневного pg_dump с ротацией
+e2e/          Playwright: сценарии приёмки на живом стеке
 ```
 
 ## API этапа 1
@@ -127,6 +172,19 @@ caddy/        Caddyfile: /api → api, остальное → web, HTTPS авт�
 - «Закрыть стол»: все сессии стола закрываются, гостевые токены сразу перестают работать; активные заказы визита становятся `closed`, открытые вызовы — «взяты» закрывшим. Следующий скан начинает новый визит.
 - «Стол должен быть открыт»: пока официант не открыл стол, гость видит меню, но заказать и позвать не может (`session_table_not_open`).
 - Визит стола — все его сессии, которые персонал ещё не закрыл (включая истёкшие: гости могут ещё сидеть).
+
+### Этап 6
+
+| Метод | Путь | Кто |
+|---|---|---|
+| GET | `/api/admin/tables/qr.pdf?hall_id=` | admin — A4, 6 карточек на лист: логотип или название, QR, номер стола, подсказка |
+| GET / POST | `/api/admin/users` | admin |
+| PATCH | `/api/admin/users/{id}` | admin — имя, роль, блокировка, новый пароль; последнего админа убрать нельзя |
+| PUT | `/api/admin/settings` | admin — плюс `telegram_enabled`, `telegram_chat_id`, `telegram_bot_token` (только запись; `""` удаляет) |
+| POST | `/api/admin/settings/telegram-test` | admin — тестовое сообщение |
+
+- Живое превью в «Меню» — это настоящее гостевое меню (`/?preview=1&lang=xx`) в режиме просмотра: без корзины и кнопок вызова, обновляется по тем же realtime-событиям.
+- Шрифт DejaVu для PDF лежит в `backend/app/assets/fonts` (кириллица и вьетнамский).
 
 ### QR
 

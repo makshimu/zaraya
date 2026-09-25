@@ -78,7 +78,7 @@ export default function CategoryModal({ category, onClose }: { category: Categor
                 type="time"
                 required
                 aria-label={t('menu.from')}
-                className={`${input} w-32`}
+                className={input.replace('w-full', 'w-32')}
                 value={form.available_from ?? ''}
                 onChange={(e) => setForm({ ...form, available_from: e.target.value })}
               />
@@ -87,7 +87,7 @@ export default function CategoryModal({ category, onClose }: { category: Categor
                 type="time"
                 required
                 aria-label={t('menu.to')}
-                className={`${input} w-32`}
+                className={input.replace('w-full', 'w-32')}
                 value={form.available_to ?? ''}
                 onChange={(e) => setForm({ ...form, available_to: e.target.value })}
               />
