@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 import { ApiError } from '../../api/client'
 import { useSettings } from '../../api/settings'
-import { tr } from '../../lib/i18n-content'
+import { tr } from '../../../../shared/localized'
 import type { Localized } from '../../api/types'
 
 export function useErrorText() {

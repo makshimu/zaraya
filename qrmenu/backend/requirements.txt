@@ -11,3 +11,4 @@ segno>=1.6
 redis>=5.0
 pillow>=10.4
 python-multipart>=0.0.9
+tzdata>=2024.1

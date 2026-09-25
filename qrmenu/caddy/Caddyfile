@@ -8,7 +8,9 @@
 		file_server
 	}
 
-	handle /api/* {
+	# /t/{token} is the URL printed in table QR codes: the api starts a session and redirects
+	@api path /api/* /t/*
+	handle @api {
 		reverse_proxy api:8000
 	}
 

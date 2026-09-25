@@ -66,7 +66,8 @@ class RestaurantSettingsOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     name: dict[str, str]
-    logo_url: str | None
+    logo: str | None
+    logo_urls: dict[str, str] | None = None
     currency: str
     languages: list[str]
     default_language: str

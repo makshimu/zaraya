@@ -1,4 +1,4 @@
-import { BookOpen, LogOut, QrCode } from 'lucide-react'
+import { BookOpen, LogOut, QrCode, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router-dom'
 
@@ -8,6 +8,7 @@ import LanguageSwitcher from './LanguageSwitcher'
 const NAV = [
   { to: '/menu', label: 'nav.menu', icon: BookOpen },
   { to: '/tables', label: 'nav.tables', icon: QrCode },
+  { to: '/settings', label: 'nav.settings', icon: Settings, adminOnly: true },
 ]
 
 export default function Layout() {
@@ -19,7 +20,7 @@ export default function Layout() {
       <aside className="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white p-3">
         <div className="mb-4 rounded-xl bg-violet-500 px-4 py-3 font-semibold text-white">{t('app.title')}</div>
         <nav className="flex flex-1 flex-col gap-1">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {NAV.filter((n) => !n.adminOnly || user?.role === 'admin').map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}

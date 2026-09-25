@@ -62,7 +62,7 @@ async def clean_db() -> AsyncIterator[None]:
         await conn.execute(
             text(
                 'TRUNCATE "audit_log", "table", "hall", "user", "restaurant_settings", '
-                '"category", "modifier_group" RESTART IDENTITY CASCADE'
+                '"category", "modifier_group", "table_session" RESTART IDENTITY CASCADE'
             )
         )
     async with SessionLocal() as db:
@@ -101,3 +101,10 @@ async def admin_client(client: AsyncClient) -> AsyncClient:
 async def waiter_client() -> AsyncIterator[AsyncClient]:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield await _login(c, WAITER)
+
+
+@pytest.fixture
+async def guest_client() -> AsyncIterator[AsyncClient]:
+    """A guest phone: https so the Secure session cookie round-trips."""
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="https://test") as c:
+        yield c

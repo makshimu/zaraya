@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from redis.asyncio import Redis
 from sqlalchemy import text
 
-from app.api import auth, menu, settings, tables
+from app.api import auth, guest, menu, settings, tables
 from app.core.config import get_settings
 from app.core.db import SessionLocal
 
@@ -32,6 +32,8 @@ admin.include_router(settings.router)
 admin.include_router(tables.router)
 admin.include_router(menu.router)
 app.include_router(admin)
+app.include_router(guest.router)
+app.include_router(guest.qr_router)
 
 # In production Caddy serves /media straight from the volume; this mount covers local dev
 _media = get_settings()

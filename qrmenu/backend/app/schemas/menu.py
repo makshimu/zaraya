@@ -203,3 +203,29 @@ class MenuOut(BaseModel):
     categories: list[CategoryOut]
     items: list[ItemOut]
     modifier_groups: list[ModifierGroupOut]
+
+
+class RestaurantSettingsIn(BaseModel):
+    name: LocalizedRequired
+    logo: ImageKey = None
+    currency: str = Field(pattern=r"^[A-Z]{3}$")
+    languages: list[Annotated[str, Field(pattern=r"^[a-z]{2,8}$")]] = Field(min_length=1, max_length=20)
+    default_language: str
+    timezone: str
+    session_ttl_minutes: int = Field(ge=1, le=24 * 60)
+    require_first_order_confirmation: bool
+    require_table_open: bool
+
+    @model_validator(mode="after")
+    def check(self):
+        from zoneinfo import available_timezones
+
+        self.languages = list(dict.fromkeys(self.languages))
+        if self.default_language not in self.languages:
+            raise ValueError("default_language must be one of languages")
+        # Default language first: the admin shows it first and requires it
+        self.languages.remove(self.default_language)
+        self.languages.insert(0, self.default_language)
+        if self.timezone not in available_timezones():
+            raise ValueError("unknown timezone")
+        return self

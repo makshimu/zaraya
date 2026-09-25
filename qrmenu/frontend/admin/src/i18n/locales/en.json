@@ -11,7 +11,8 @@
   "nav": {
     "menu": "Menu",
     "tables": "Tables & QR",
-    "logout": "Log out"
+    "logout": "Log out",
+    "settings": "Settings"
   },
   "roles": {
     "admin": "Administrator",
@@ -125,5 +126,24 @@
     "vegetarian": "Vegetarian",
     "hit": "Bestseller",
     "new": "New"
+  },
+  "settings": {
+    "title": "Settings",
+    "restaurant": "Restaurant",
+    "name": "Name",
+    "logo": "Logo",
+    "currency": "Currency (ISO code)",
+    "timezone": "Time zone",
+    "languages": "Menu languages",
+    "languagesHint": "The selected language is the main one: it is required and shown to guests when a translation is missing.",
+    "addLanguage": "Add",
+    "sessions": "Sessions and orders",
+    "ttl": "Table session lifetime, minutes",
+    "ttlHint": "After it expires the guest can still browse the menu but must rescan the QR to order.",
+    "confirmFirstOrder": "First order of a session needs waiter confirmation",
+    "confirmFirstOrderHint": "Protects against orders from a photographed QR.",
+    "requireOpen": "Table must be opened by a waiter",
+    "requireOpenHint": "Orders are only possible after a waiter opens the table when seating guests.",
+    "saved": "Saved"
   }
 }

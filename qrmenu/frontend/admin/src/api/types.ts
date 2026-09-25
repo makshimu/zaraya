@@ -33,7 +33,8 @@ export interface TableInput {
 
 export interface RestaurantSettings {
   name: Record<string, string>
-  logo_url: string | null
+  logo: string | null
+  logo_urls: ImageUrls | null
   currency: string
   languages: string[]
   default_language: string

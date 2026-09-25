@@ -7,6 +7,7 @@ from app.models.menu import (
     Modifier,
     ModifierGroup,
 )
+from app.models.session import TableSession
 from app.models.settings import RestaurantSettings
 from app.models.table import Hall, Table
 from app.models.user import User, UserRole
@@ -22,6 +23,7 @@ __all__ = [
     "ModifierGroup",
     "RestaurantSettings",
     "Table",
+    "TableSession",
     "User",
     "UserRole",
 ]

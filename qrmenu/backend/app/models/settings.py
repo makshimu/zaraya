@@ -12,7 +12,7 @@ class RestaurantSettings(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[dict] = mapped_column(JSONB, default=dict)
-    logo_url: Mapped[str | None] = mapped_column(String(512))
+    logo: Mapped[str | None] = mapped_column(String(64))  # media key
     currency: Mapped[str] = mapped_column(String(3), default="VND")
     languages: Mapped[list[str]] = mapped_column(ARRAY(String(8)), default=lambda: ["ru", "en"])
     default_language: Mapped[str] = mapped_column(String(8), default="ru")

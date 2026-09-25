@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     media_url_prefix: str = "/media"
     max_upload_mb: int = 10
 
+    # Guest session cookie. Keep secure=True in production (Caddy serves HTTPS)
+    guest_cookie_name: str = "qr_session"
+    guest_cookie_secure: bool = True
+
     table_token_bytes: int = 12  # 12 bytes -> 16 url-safe chars
 
 

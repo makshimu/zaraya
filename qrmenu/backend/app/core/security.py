@@ -1,4 +1,5 @@
 import secrets
+import uuid
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
@@ -41,6 +42,28 @@ def decode_access_token(token: str) -> int | None:
         return None
     try:
         return int(payload["sub"])
+    except (KeyError, ValueError):
+        return None
+
+
+def create_guest_token(session_id: uuid.UUID, expires_at: datetime) -> str:
+    payload = {"sid": str(session_id), "exp": expires_at, "typ": "guest"}
+    return jwt.encode(payload, get_settings().jwt_secret, algorithm=ALGORITHM)
+
+
+def decode_guest_token(token: str) -> uuid.UUID | None:
+    """Session id from a guest cookie. Expiry is checked against the DB row, not here,
+    so an expired session can still be recognised (to tell the guest to rescan)."""
+    try:
+        payload = jwt.decode(
+            token, get_settings().jwt_secret, algorithms=[ALGORITHM], options={"verify_exp": False}
+        )
+    except jwt.PyJWTError:
+        return None
+    if payload.get("typ") != "guest":
+        return None
+    try:
+        return uuid.UUID(payload["sid"])
     except (KeyError, ValueError):
         return None
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { moneyToInput, parseMoney } from '../lib/money'
+import { moneyToInput, parseMoney } from '../../../shared/money'
 import { input } from './ui'
 
 /** Text input for a price; reports integer minor units (or null while the text is invalid). */
