@@ -19,6 +19,17 @@ API = "https://api.telegram.org"
 TIMEOUT = 10
 
 TEXTS = {
+    "vi": {
+        "order": "🆕 <b>Bàn {table}</b>: đơn #{id}",
+        "pending": "⏳ chờ xác nhận",
+        "total": "Tổng",
+        "waiter": "🙋 <b>Bàn {table}</b> gọi nhân viên",
+        "bill": "🧾 <b>Bàn {table}</b> yêu cầu thanh toán",
+        "cash": "tiền mặt",
+        "card": "thẻ",
+        "qr": "chuyển khoản QR",
+        "test": "✅ Đã kết nối thông báo QR menu",
+    },
     "ru": {
         "order": "🆕 <b>Стол {table}</b>: заказ №{id}",
         "pending": "⏳ ждёт подтверждения",

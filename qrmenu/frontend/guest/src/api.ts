@@ -41,14 +41,19 @@ export interface OrderLine {
   comment: string
 }
 
-export async function placeOrder(items: OrderLine[], comment: string, idempotencyKey: string): Promise<GuestOrder> {
+export async function placeOrder(
+  items: OrderLine[],
+  comment: string,
+  language: string,
+  idempotencyKey: string,
+): Promise<GuestOrder> {
   let resp: Response
   try {
     resp = await fetch('/api/guest/orders', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
-      body: JSON.stringify({ items, comment }),
+      body: JSON.stringify({ items, comment, language }),
     })
   } catch {
     throw new OrderError(0, 'network')

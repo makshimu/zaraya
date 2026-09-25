@@ -18,6 +18,7 @@ class OrderIn(BaseModel):
 
     items: list[OrderLineIn] = Field(min_length=1, max_length=50)
     comment: str = Field(default="", max_length=500)
+    language: str | None = Field(default=None, max_length=8)  # the menu language on screen
 
 
 class OrderItemModifierOut(BaseModel):
@@ -44,6 +45,7 @@ class OrderOut(BaseModel):
     table_number: str
     status: OrderStatus
     comment: str
+    language: str | None
     total: int
     created_at: datetime
     updated_at: datetime

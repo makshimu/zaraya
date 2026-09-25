@@ -18,11 +18,14 @@ from app.services.qr import table_url
 
 # DejaVu ships with the app (see assets/fonts/LICENSE-DejaVu.txt): it covers Cyrillic and Vietnamese
 FONT_DIRS = [str(Path(__file__).resolve().parent.parent / "assets" / "fonts")]
+# Card texts in the restaurant's main language. DejaVu has no CJK glyphs, so a Japanese,
+# Korean or Chinese main language falls back to English on the printed cards.
 HINTS = {
+    "vi": "Quét mã để xem thực đơn và gọi món",
     "ru": "Отсканируйте, чтобы открыть меню и сделать заказ",
     "en": "Scan to see the menu and order",
 }
-TABLE_WORD = {"ru": "Стол", "en": "Table"}
+TABLE_WORD = {"vi": "Bàn", "ru": "Стол", "en": "Table"}
 
 COLS, ROWS = 2, 3
 CARD_W, CARD_H = 90 * mm, 90 * mm

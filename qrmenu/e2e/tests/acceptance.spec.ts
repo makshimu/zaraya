@@ -4,7 +4,7 @@
  */
 import { expect, test } from '@playwright/test'
 
-import { adminPage, chimes, phone, Seed } from './helpers'
+import { adminPage, chimes, closeContexts, phone, Seed } from './helpers'
 
 let seed: Seed
 let data: Awaited<ReturnType<Seed['menuAndTable']>>
@@ -24,6 +24,7 @@ test.beforeEach(async ({ playwright, baseURL }) => {
 })
 
 test.afterEach(async () => {
+  await closeContexts()
   await seed.cleanup()
 })
 
@@ -69,7 +70,7 @@ test('call the waiter → the table lights up in the hall; "Take" reaches the gu
   const staff = await adminPage(browser, baseURL)
   const guest = await phone(browser, baseURL)
   await guest.goto(data.table.qr_url)
-  await expect(guest.getByTestId('call-waiter')).toBeVisible()
+  await expect(guest.getByText(`Стол e2e-${seed.tag}`)).toBeVisible()
 
   await guest.getByTestId('call-waiter').click()
   const tile = staff.getByTestId('hall-table').filter({ hasText: `e2e-${seed.tag}` })
@@ -88,6 +89,7 @@ test('ask for the bill, then close the table → the guest token stops working',
   const staff = await adminPage(browser, baseURL)
   const guest = await phone(browser, baseURL)
   await guest.goto(data.table.qr_url)
+  await expect(guest.getByText(`Стол e2e-${seed.tag}`)).toBeVisible()
 
   await guest.getByTestId('ask-bill').click()
   await guest.getByRole('button', { name: 'Картой' }).click()

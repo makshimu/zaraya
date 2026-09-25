@@ -1,4 +1,4 @@
-import { devices, expect, type APIRequestContext, type Browser, type Page } from '@playwright/test'
+import { devices, expect, type APIRequestContext, type Browser, type BrowserContext, type Page } from '@playwright/test'
 
 export const ADMIN = {
   email: process.env.ADMIN_EMAIL ?? 'admin@example.com',
@@ -97,6 +97,14 @@ export class Seed {
   }
 }
 
+// Every phone and staff window opened by a test; closed afterwards so their live sockets
+// don't keep reacting to the next test's events
+const contexts: BrowserContext[] = []
+
+export async function closeContexts() {
+  await Promise.all(contexts.splice(0).map((c) => c.close()))
+}
+
 /** A guest phone: its own browser context, so its own session cookie. */
 export async function phone(browser: Browser, baseURL: string | undefined): Promise<Page> {
   const context = await browser.newContext({
@@ -105,6 +113,7 @@ export async function phone(browser: Browser, baseURL: string | undefined): Prom
     ignoreHTTPSErrors: true,
     locale: 'ru-RU',
   })
+  contexts.push(context)
   return context.newPage()
 }
 
@@ -116,6 +125,7 @@ export async function adminPage(browser: Browser, baseURL: string | undefined, p
     locale: 'ru-RU',
     viewport: { width: 1440, height: 900 },
   })
+  contexts.push(context)
   const page = await context.newPage()
   await page.addInitScript(() => {
     ;(window as any).__chimes = 0

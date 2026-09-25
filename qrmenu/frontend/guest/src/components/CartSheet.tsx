@@ -83,6 +83,7 @@ export default function CartSheet({
           comment: line.comment,
         })),
         comment,
+        lang, // analytics: which language guests order in
         attempt.current.key,
       )
       attempt.current = null

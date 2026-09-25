@@ -49,6 +49,8 @@ class Order(Base):
         Enum(OrderStatus, name="order_status"), index=True
     )
     comment: Mapped[str] = mapped_column(String(500), default="")
+    # Menu language the guest was browsing in when ordering (for analytics)
+    language: Mapped[str | None] = mapped_column(String(8), index=True)
     total: Mapped[int]  # minor units, computed by the backend only
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True

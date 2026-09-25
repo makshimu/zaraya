@@ -25,7 +25,8 @@ def sent(monkeypatch):
 
 async def enable_telegram(admin_client, **extra):
     settings = (await admin_client.get(f"{API}/settings")).json()
-    body = {**settings, "telegram_enabled": True, "telegram_chat_id": "-100123", "telegram_bot_token": TOKEN, **extra}
+    # Russian as the main language: the messages below are checked in Russian
+    body = {**settings, "default_language": "ru", "telegram_enabled": True, "telegram_chat_id": "-100123", "telegram_bot_token": TOKEN, **extra}
     return await admin_client.put(f"{API}/settings", json=body)
 
 

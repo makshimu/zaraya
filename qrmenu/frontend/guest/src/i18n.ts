@@ -1,11 +1,17 @@
 import { createContext, useContext } from 'react'
 
 import en from './locales/en.json'
+import ja from './locales/ja.json'
+import ko from './locales/ko.json'
 import ru from './locales/ru.json'
+import vi from './locales/vi.json'
+import zh from './locales/zh.json'
 
 // UI strings. Add a language: drop a JSON file into ./locales and register it here.
 // Menu content languages come from the restaurant settings; UI falls back to English.
-const DICTS: Record<string, Record<string, string>> = { ru, en }
+const DICTS: Record<string, Record<string, string>> = { vi, en, ru, ja, ko, zh }
+
+export { LANGUAGE_NAMES } from '../../shared/languages'
 
 export function translate(lang: string, key: string, vars?: Record<string, string | number>): string {
   let text = DICTS[lang]?.[key] ?? DICTS.en[key] ?? key

@@ -6,7 +6,8 @@
   "lang": {
     "label": "Язык",
     "ru": "Русский",
-    "en": "English"
+    "en": "English",
+    "vi": "Tiếng Việt"
   },
   "nav": {
     "hall": "Зал",
@@ -15,7 +16,8 @@
     "tables": "Столы и QR",
     "logout": "Выйти",
     "settings": "Настройки",
-    "users": "Пользователи"
+    "users": "Пользователи",
+    "analytics": "Аналитика"
   },
   "roles": {
     "admin": "Администратор",
@@ -138,7 +140,9 @@
     "confirmDeleteGroup": "Удалить группу «{{name}}»? Она пропадёт у всех блюд.",
     "preview": "Как видит гость",
     "previewLanguage": "Язык превью",
-    "previewReload": "Обновить превью"
+    "previewReload": "Обновить превью",
+    "translations": "Переводы",
+    "mainLanguage": "основной язык"
   },
   "badges": {
     "spicy": "Острое",
@@ -290,5 +294,65 @@
       "waiter": "Зал, заказы, вызовы, открытие и закрытие столов",
       "admin": "Всё, включая меню, столы, пользователей и настройки"
     }
+  },
+  "analytics": {
+    "title": "Аналитика",
+    "period": {
+      "7": "7 дней",
+      "30": "30 дней",
+      "90": "90 дней",
+      "custom": "Период"
+    },
+    "from": "с",
+    "to": "по",
+    "noData": "За этот период заказов нет",
+    "kpi": {
+      "orders": "Заказов",
+      "revenue": "Выручка",
+      "avgCheck": "Средний чек",
+      "items": "Блюд продано",
+      "visits": "Визитов"
+    },
+    "byHour": "Когда приходят заказы",
+    "byHourHint": "Заказы по часам за период, местное время ({{tz}})",
+    "peak": "Пик: {{hour}}:00–{{next}}:00",
+    "showTable": "Показать таблицей",
+    "showChart": "Показать график",
+    "hour": "Час",
+    "ordersCol": "Заказов",
+    "revenueCol": "Выручка",
+    "heatmap": "По дням недели и часам",
+    "heatmapHint": "Чем темнее клетка, тем больше заказов",
+    "weekday": {
+      "1": "Пн",
+      "2": "Вт",
+      "3": "Ср",
+      "4": "Чт",
+      "5": "Пт",
+      "6": "Сб",
+      "7": "Вс"
+    },
+    "byDay": "Заказы по дням",
+    "topItems": "Что заказывают чаще всего",
+    "qty": "{{count}} шт.",
+    "dayparts": "Что заказывают в разное время дня",
+    "part": {
+      "morning": "Утро",
+      "lunch": "Обед",
+      "afternoon": "День",
+      "evening": "Вечер",
+      "night": "Ночь"
+    },
+    "languages": "На каких языках заказывают",
+    "languagesHint": "Язык меню, на котором гость оформил заказ",
+    "favorites": "Любимые блюда",
+    "unknownLanguage": "не указан",
+    "tooltipHour": "{{hour}}:00 — {{orders}}, {{revenue}}",
+    "tooltipCell": "{{day}}, {{hour}}:00 — {{orders}}",
+    "tooltipDay": "{{date}} — {{orders}}, {{revenue}}",
+    "ordersN_one": "{{count}} заказ",
+    "ordersN_few": "{{count}} заказа",
+    "ordersN_many": "{{count}} заказов",
+    "ordersN_other": "{{count}} заказа"
   }
 }

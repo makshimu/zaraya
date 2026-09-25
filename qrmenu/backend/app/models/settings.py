@@ -5,6 +5,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base
 
 
+# Menu languages of a new restaurant; the first one is the main language
+DEFAULT_LANGUAGES = ("vi", "en", "ru", "ja", "ko", "zh")
+
+
 class RestaurantSettings(Base):
     """Single-row table (id=1): the restaurant is single-tenant."""
 
@@ -14,8 +18,10 @@ class RestaurantSettings(Base):
     name: Mapped[dict] = mapped_column(JSONB, default=dict)
     logo: Mapped[str | None] = mapped_column(String(64))  # media key
     currency: Mapped[str] = mapped_column(String(3), default="VND")
-    languages: Mapped[list[str]] = mapped_column(ARRAY(String(8)), default=lambda: ["ru", "en"])
-    default_language: Mapped[str] = mapped_column(String(8), default="ru")
+    languages: Mapped[list[str]] = mapped_column(
+        ARRAY(String(8)), default=lambda: list(DEFAULT_LANGUAGES)
+    )
+    default_language: Mapped[str] = mapped_column(String(8), default=DEFAULT_LANGUAGES[0])
     # IANA zone used for category display schedules
     timezone: Mapped[str] = mapped_column(String(64), default="Asia/Ho_Chi_Minh")
     session_ttl_minutes: Mapped[int] = mapped_column(default=180)

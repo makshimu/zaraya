@@ -40,6 +40,7 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
       MEDIA_DIR: /data/media
+      DEMO_DATA: ${DEMO_DATA:-false}
     volumes:
       - media:/data/media
     depends_on:

@@ -164,7 +164,7 @@ async def test_guest_menu_filters(admin_client, guest_client):
     assert [(i["id"], i["is_available"]) for i in items] == [(on["id"], True), (sold_out["id"], False)]
     assert items[0]["prices"][0]["amount"] == 75000
     assert menu["restaurant"]["currency"] == "VND"
-    assert menu["restaurant"]["languages"] == ["ru", "en"]
+    assert menu["restaurant"]["languages"] == ["vi", "en", "ru", "ja", "ko", "zh"]
 
 
 async def test_guest_menu_includes_only_used_modifier_groups(admin_client, guest_client):

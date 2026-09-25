@@ -135,7 +135,7 @@ export default function MenuPage() {
         )}
         {editing?.kind === 'group' && <GroupModal group={editing.group} onClose={() => setEditing(null)} />}
       </div>
-      <aside className="hidden w-[320px] shrink-0 xl:block">
+      <aside className="hidden w-[360px] shrink-0 xl:block">
         <PhonePreview />
       </aside>
     </div>

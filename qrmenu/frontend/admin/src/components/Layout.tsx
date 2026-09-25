@@ -1,4 +1,5 @@
-import { Bell, BookOpen, LayoutGrid, LogOut, QrCode, Receipt, Settings, UserCog } from 'lucide-react'
+import { BarChart3, Bell, BookOpen, LayoutGrid, LogOut, QrCode, Receipt, Settings, UserCog } from 'lucide-react'
+import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router-dom'
 
@@ -13,6 +14,7 @@ const NAV = [
   { to: '/orders', label: 'nav.orders', icon: Receipt, badge: 'pending' },
   { to: '/menu', label: 'nav.menu', icon: BookOpen },
   { to: '/tables', label: 'nav.tables', icon: QrCode },
+  { to: '/analytics', label: 'nav.analytics', icon: BarChart3, adminOnly: true },
   { to: '/users', label: 'nav.users', icon: UserCog, adminOnly: true },
   { to: '/settings', label: 'nav.settings', icon: Settings, adminOnly: true },
 ]
@@ -85,7 +87,10 @@ export default function Layout() {
           <LanguageSwitcher />
         </header>
         <main className="flex-1 p-6">
-          <Outlet />
+          {/* pages load lazily: keep the sidebar while one arrives */}
+          <Suspense fallback={null}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

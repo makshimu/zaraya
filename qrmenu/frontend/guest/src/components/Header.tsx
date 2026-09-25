@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react'
 
 import { tr } from '../../../shared/localized'
-import { LangContext, useT } from '../i18n'
+import { LANGUAGE_NAMES, LangContext, useT } from '../i18n'
 import type { GuestMenu } from '../types'
 import { SearchIcon, XIcon } from './icons'
 
@@ -39,7 +39,7 @@ export default function Header({
       ) : (
         <>
           {restaurant.logo_urls && (
-            <img src={restaurant.logo_urls.w400} alt="" className="size-10 rounded-full object-cover" />
+            <img src={restaurant.logo_urls.w400} alt="" className="size-10 rounded-full object-cover max-[360px]:hidden" />
           )}
           <div className="min-w-0 flex-1">
             <div className="truncate text-lg leading-tight font-bold">{name}</div>
@@ -62,11 +62,11 @@ export default function Header({
           aria-label={t('language')}
           value={lang}
           onChange={(e) => setLang(e.target.value)}
-          className="h-10 shrink-0 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium uppercase"
+          className="h-10 max-w-32 shrink-0 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium"
         >
           {restaurant.languages.map((l) => (
             <option key={l} value={l}>
-              {l.toUpperCase()}
+              {LANGUAGE_NAMES[l] ?? l.toUpperCase()}
             </option>
           ))}
         </select>

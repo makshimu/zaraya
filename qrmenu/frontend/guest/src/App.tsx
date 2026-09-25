@@ -82,7 +82,9 @@ function useSessionState(session: GuestSession | undefined) {
   if (qrError === 'invalid_qr' || qrError === 'table_inactive') {
     if (!session?.status || session.status !== 'active') return qrError
   }
-  if (!session || session.status === null) return 'none'
+  // Still loading: no "scan the QR" flash and no blocked buttons; the server checks anyway
+  if (!session) return 'loading'
+  if (session.status === null) return 'none'
   if (session.status === 'active' && session.expires_at && new Date(session.expires_at) <= new Date()) return 'expired'
   return session.status
 }
@@ -94,7 +96,7 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
   const reason = useSessionState(session.data)
   const orders = useOrders()
   // i18n key explaining why ordering and calls are unavailable right now
-  const blockedReason = reason === 'active' ? null : (SESSION_MESSAGES[reason] ?? 'rescan')
+  const blockedReason = reason === 'active' || reason === 'loading' ? null : (SESSION_MESSAGES[reason] ?? 'rescan')
   const [toast, setToast] = useState<string | null>(null)
   const clearToast = useCallback(() => setToast(null), [])
   useGuestRealtime(session.isSuccess ? (session.data.expires_at ?? null) : undefined, (call) => {
@@ -225,7 +227,7 @@ function BottomBar({
   const count = cart.lines.reduce((n, l) => n + l.quantity, 0)
   const total = lines.reduce((sum, r) => sum + (r.available ? r.unit * r.line.quantity : 0), 0)
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-lg flex-col gap-2 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-lg flex-col gap-2 bg-gradient-to-t from-white via-white/95 to-white/0 p-3 pt-6 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <ServiceButtons blockedReason={blockedReason} notify={notify} />
       {(count > 0 || ordersCount > 0) && (
         <div className="flex gap-2">

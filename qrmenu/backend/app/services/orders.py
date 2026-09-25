@@ -161,6 +161,8 @@ async def create_order(
         idempotency_key=idempotency_key,
         status=OrderStatus.pending if needs_confirmation else OrderStatus.accepted,
         comment=body.comment.strip(),
+        # Only languages the restaurant offers; anything else counts as the default one
+        language=body.language if body.language in settings.languages else settings.default_language,
         total=sum(line.total for line in lines),
         items=lines,
     )
@@ -188,6 +190,7 @@ def order_out(order: Order) -> OrderOut:
         table_number=order.table.number,
         status=order.status,
         comment=order.comment,
+        language=order.language,
         total=order.total,
         created_at=order.created_at,
         updated_at=order.updated_at,

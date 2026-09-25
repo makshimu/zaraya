@@ -12,9 +12,9 @@ export const SESSION_MESSAGES: Record<string, string> = {
 }
 
 /** Shown whenever ordering is not possible; the menu itself stays browsable. */
-export default function SessionBanner({ reason }: { reason: SessionStatus | 'none' | 'invalid_qr' }) {
+export default function SessionBanner({ reason }: { reason: SessionStatus | 'none' | 'invalid_qr' | 'loading' }) {
   const t = useT()
-  if (reason === 'active') return null
+  if (reason === 'active' || reason === 'loading') return null
   return (
     <div
       role="status"

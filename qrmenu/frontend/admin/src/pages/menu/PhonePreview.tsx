@@ -2,6 +2,7 @@ import { RotateCw } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { languageName } from '../../../../shared/languages'
 import { useContentLocale } from './shared'
 
 /** The guest menu exactly as guests see it, in a phone frame. It is the real guest app in
@@ -20,13 +21,13 @@ export default function PhonePreview() {
         <div className="flex items-center gap-1">
           <select
             aria-label={t('menu.previewLanguage')}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm uppercase"
+            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm"
             value={shownLang}
             onChange={(e) => setLang(e.target.value)}
           >
             {content.languages.map((l) => (
               <option key={l} value={l}>
-                {l}
+                {languageName(l)}
               </option>
             ))}
           </select>
@@ -40,7 +41,7 @@ export default function PhonePreview() {
           </button>
         </div>
       </div>
-      <div className="mx-auto w-[300px] rounded-[2.75rem] border-[10px] border-sky-200 bg-white p-1 shadow-lg">
+      <div className="mx-auto w-[350px] rounded-[2.75rem] border-[10px] border-sky-200 bg-white p-1 shadow-lg">
         <div className="mx-auto mb-1 h-5 w-24 rounded-b-2xl bg-sky-200" />
         <iframe
           key={`${shownLang}-${reloads}`}

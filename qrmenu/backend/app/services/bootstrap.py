@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 async def ensure_initial_data(db: AsyncSession) -> None:
     """Create the settings row and the first admin on an empty database."""
     if await db.get(RestaurantSettings, 1) is None:
-        db.add(RestaurantSettings(id=1, name={"ru": "Мой ресторан", "en": "My restaurant"}))
+        db.add(RestaurantSettings(id=1, name={"vi": "Nhà hàng của tôi", "en": "My restaurant", "ru": "Мой ресторан"}))
 
     if await db.scalar(select(User.id).limit(1)) is None:
         settings = get_settings()

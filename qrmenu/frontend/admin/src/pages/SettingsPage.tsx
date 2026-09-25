@@ -8,6 +8,7 @@ import type { RestaurantSettings } from '../api/types'
 import ImagePicker from '../components/ImagePicker'
 import LocalizedField from '../components/LocalizedField'
 import { btn, input, label } from '../components/ui'
+import { languageName } from '../../../shared/languages'
 import { useErrorText } from './menu/shared'
 
 export default function SettingsPage() {
@@ -124,7 +125,7 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
                   checked={form.default_language === lang}
                   onChange={() => set({ default_language: lang })}
                 />
-                <span className="font-medium uppercase">{lang}</span>
+                <span className="font-medium">{languageName(lang)}</span>
               </label>
               {form.languages.length > 1 && form.default_language !== lang && (
                 <button

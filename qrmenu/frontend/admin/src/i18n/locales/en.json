@@ -6,7 +6,8 @@
   "lang": {
     "label": "Language",
     "ru": "Русский",
-    "en": "English"
+    "en": "English",
+    "vi": "Tiếng Việt"
   },
   "nav": {
     "hall": "Hall",
@@ -15,7 +16,8 @@
     "tables": "Tables & QR",
     "logout": "Log out",
     "settings": "Settings",
-    "users": "Users"
+    "users": "Users",
+    "analytics": "Analytics"
   },
   "roles": {
     "admin": "Administrator",
@@ -136,7 +138,9 @@
     "confirmDeleteGroup": "Delete group “{{name}}”? It will be removed from all dishes.",
     "preview": "Guest view",
     "previewLanguage": "Preview language",
-    "previewReload": "Reload preview"
+    "previewReload": "Reload preview",
+    "translations": "Translations",
+    "mainLanguage": "main language"
   },
   "badges": {
     "spicy": "Spicy",
@@ -282,5 +286,63 @@
       "waiter": "Hall, orders, calls, opening and closing tables",
       "admin": "Everything, including menu, tables, users and settings"
     }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "period": {
+      "7": "7 days",
+      "30": "30 days",
+      "90": "90 days",
+      "custom": "Custom"
+    },
+    "from": "from",
+    "to": "to",
+    "noData": "No orders in this period",
+    "kpi": {
+      "orders": "Orders",
+      "revenue": "Revenue",
+      "avgCheck": "Average check",
+      "items": "Dishes sold",
+      "visits": "Visits"
+    },
+    "byHour": "When orders come in",
+    "byHourHint": "Orders by hour over the period, local time ({{tz}})",
+    "peak": "Peak: {{hour}}:00–{{next}}:00",
+    "showTable": "Show as table",
+    "showChart": "Show chart",
+    "hour": "Hour",
+    "ordersCol": "Orders",
+    "revenueCol": "Revenue",
+    "heatmap": "By weekday and hour",
+    "heatmapHint": "The darker the cell, the more orders",
+    "weekday": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "byDay": "Orders by day",
+    "topItems": "Most ordered dishes",
+    "qty": "{{count}} pcs",
+    "dayparts": "What guests order at different times of day",
+    "part": {
+      "morning": "Morning",
+      "lunch": "Lunch",
+      "afternoon": "Afternoon",
+      "evening": "Evening",
+      "night": "Night"
+    },
+    "languages": "Languages guests order in",
+    "languagesHint": "The menu language the guest placed the order in",
+    "favorites": "Favourite dishes",
+    "unknownLanguage": "not recorded",
+    "tooltipHour": "{{hour}}:00 — {{orders}}, {{revenue}}",
+    "tooltipCell": "{{day}}, {{hour}}:00 — {{orders}}",
+    "tooltipDay": "{{date}} — {{orders}}, {{revenue}}",
+    "ordersN_one": "{{count}} order",
+    "ordersN_other": "{{count}} orders"
   }
 }
