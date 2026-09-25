@@ -65,5 +65,6 @@
   "pay.cash": "現金",
   "pay.card": "カード",
   "pay.qr": "QR振込",
-  "tableNotOpen": "スタッフにテーブルを開けてもらうと注文できます"
+  "tableNotOpen": "スタッフにテーブルを開けてもらうと注文できます",
+  "previewNotice": "プレビューです — 注文や呼び出しは送信されません"
 }

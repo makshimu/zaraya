@@ -65,5 +65,6 @@
   "pay.cash": "Cash",
   "pay.card": "Card",
   "pay.qr": "QR transfer",
-  "tableNotOpen": "Ask the waiter to open the table — then you can order"
+  "tableNotOpen": "Ask the waiter to open the table — then you can order",
+  "previewNotice": "This is a preview — orders and calls are not sent"
 }

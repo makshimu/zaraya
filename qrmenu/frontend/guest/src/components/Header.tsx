@@ -39,7 +39,11 @@ export default function Header({
       ) : (
         <>
           {restaurant.logo_urls && (
-            <img src={restaurant.logo_urls.w400} alt="" className="size-10 rounded-full object-cover max-[360px]:hidden" />
+            <img
+              src={restaurant.logo_urls.w400}
+              alt=""
+              className="size-10 rounded-full object-cover max-[360px]:hidden"
+            />
           )}
           <div className="min-w-0 flex-1">
             <div className="truncate text-lg leading-tight font-bold">{name}</div>

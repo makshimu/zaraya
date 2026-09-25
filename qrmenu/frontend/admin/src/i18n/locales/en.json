@@ -140,7 +140,12 @@
     "previewLanguage": "Preview language",
     "previewReload": "Reload preview",
     "translations": "Translations",
-    "mainLanguage": "main language"
+    "mainLanguage": "main language",
+    "previewOpen": "Preview",
+    "showInPreview": "Show in preview",
+    "hiddenFromGuests": "Switched off — guests don't see it",
+    "previewOpenTab": "Open in a new tab",
+    "priceBlock": "Price"
   },
   "badges": {
     "spicy": "Spicy",

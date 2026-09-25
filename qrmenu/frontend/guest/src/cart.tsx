@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
+import { isPreview } from './preview'
 import { unitPrice, type Selection } from './selection'
 import type { GuestItem, GuestMenu, GuestModifierGroup } from './types'
 
@@ -21,7 +22,8 @@ interface CartState {
 }
 
 const CartContext = createContext<CartState | null>(null)
-const STORAGE_KEY = 'qrmenu_cart'
+// The admin's preview keeps its own cart so it never mixes with a real guest cart
+const STORAGE_KEY = isPreview ? 'qrmenu_cart_preview' : 'qrmenu_cart'
 
 function lineKey(itemId: number, sel: Selection, comment: string) {
   const mods = Object.values(sel.modifierIds)

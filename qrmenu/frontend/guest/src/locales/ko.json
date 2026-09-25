@@ -65,5 +65,6 @@
   "pay.cash": "현금",
   "pay.card": "카드",
   "pay.qr": "QR 이체",
-  "tableNotOpen": "직원에게 테이블을 열어 달라고 요청하면 주문할 수 있습니다"
+  "tableNotOpen": "직원에게 테이블을 열어 달라고 요청하면 주문할 수 있습니다",
+  "previewNotice": "미리보기입니다 — 주문과 호출은 전송되지 않습니다"
 }

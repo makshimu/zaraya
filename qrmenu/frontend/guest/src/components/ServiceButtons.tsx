@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 import { callStaff, OrderError, useCalls } from '../api'
 import { useT } from '../i18n'
+import { isPreview } from '../preview'
 import type { CallType, GuestCall, PaymentMethod } from '../types'
 import { BellIcon, ReceiptIcon } from './icons'
 import Sheet from './Sheet'
@@ -36,6 +37,11 @@ export default function ServiceButtons({
   }
 
   async function send(type: CallType, method?: PaymentMethod) {
+    if (isPreview) {
+      setBillOpen(false)
+      notify(t('previewNotice'))
+      return
+    }
     if (blockedReason) {
       notify(t(blockedReason))
       return

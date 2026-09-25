@@ -1,10 +1,11 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import { tr } from '../../shared/localized'
+import { GUEST_SOURCE, isPreviewCommand } from '../../shared/preview'
 import { useMenu, useOrders, useSession } from './api'
 import { CartProvider, resolveLines, useCart } from './cart'
 import CartSheet from './components/CartSheet'
-import CategoryStrip, { useActiveCategory } from './components/CategoryStrip'
+import CategoryStrip, { scrollToCategory, useActiveCategory } from './components/CategoryStrip'
 import Header from './components/Header'
 import ItemCard from './components/ItemCard'
 import ItemSheet from './components/ItemSheet'
@@ -14,6 +15,7 @@ import SessionBanner, { SESSION_MESSAGES } from './components/SessionBanner'
 import Toast from './components/Toast'
 import { formatMoney } from '../../shared/money'
 import { LangContext, pickLanguage, saveLanguage, translate, useT } from './i18n'
+import { isPreview, previewLang } from './preview'
 import { useGuestRealtime } from './realtime'
 import type { GuestItem, GuestMenu, GuestSession } from './types'
 
@@ -21,10 +23,6 @@ import type { GuestItem, GuestMenu, GuestSession } from './types'
 const params = new URLSearchParams(location.search)
 const qrError = params.get('error')
 if (qrError) history.replaceState(null, '', '/')
-
-// The admin's live preview embeds the menu with ?preview=1&lang=xx: view only, no ordering
-const preview = params.has('preview')
-const previewLang = params.get('lang')
 
 export default function App() {
   const menu = useMenu()
@@ -34,7 +32,7 @@ export default function App() {
     if (menu.data && !lang) {
       const r = menu.data.restaurant
       const picked =
-        preview && previewLang && r.languages.includes(previewLang)
+        isPreview && previewLang && r.languages.includes(previewLang)
           ? previewLang
           : pickLanguage(r.languages, r.default_language)
       setLangState(picked)
@@ -43,7 +41,7 @@ export default function App() {
   }, [menu.data, lang])
 
   const setLang = useCallback((l: string) => {
-    if (!preview) saveLanguage(l)
+    if (!isPreview) saveLanguage(l)
     setLangState(l)
   }, [])
 
@@ -96,7 +94,9 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
   const reason = useSessionState(session.data)
   const orders = useOrders()
   // i18n key explaining why ordering and calls are unavailable right now
-  const blockedReason = reason === 'active' || reason === 'loading' ? null : (SESSION_MESSAGES[reason] ?? 'rescan')
+  // (the admin's preview has no session: it never blocks, actions just aren't sent)
+  const blockedReason =
+    isPreview || reason === 'active' || reason === 'loading' ? null : (SESSION_MESSAGES[reason] ?? 'rescan')
   const [toast, setToast] = useState<string | null>(null)
   const clearToast = useCallback(() => setToast(null), [])
   useGuestRealtime(session.isSuccess ? (session.data.expires_at ?? null) : undefined, (call) => {
@@ -124,6 +124,25 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
   const openItem = openItemId === null ? null : menu.categories.flatMap((c) => c.items).find((i) => i.id === openItemId)
   const closeSheet = useCallback(() => setOpenItemId(null), [])
 
+  // In the admin's preview, the menu page can point at a dish or a category
+  useEffect(() => {
+    if (!isPreview) return
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== location.origin || !isPreviewCommand(e.data)) return
+      setPanel(null)
+      setQuery('')
+      if (e.data.type === 'show-item') setOpenItemId(e.data.itemId)
+      else {
+        setOpenItemId(null)
+        const id = e.data.categoryId
+        requestAnimationFrame(() => scrollToCategory(id))
+      }
+    }
+    window.addEventListener('message', onMessage)
+    window.parent.postMessage({ source: GUEST_SOURCE, type: 'ready' }, location.origin)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
   useEffect(() => {
     document.title = tr(restaurant.name, lang, fallback) || 'Menu'
   }, [restaurant.name, lang, fallback])
@@ -140,7 +159,7 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
         <CategoryStrip categories={categories} active={active} fallbackLang={fallback} />
       </header>
 
-      {!preview && <SessionBanner reason={reason} />}
+      {!isPreview && <SessionBanner reason={reason} />}
 
       {menu.categories.length === 0 && <p className="p-10 text-center text-slate-500">{t('emptyMenu')}</p>}
       {q && categories.length === 0 && <p className="p-10 text-center text-slate-500">{t('nothingFound')}</p>}
@@ -162,16 +181,14 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
         </section>
       ))}
 
-      {!preview && (
-        <BottomBar
-          menu={menu}
-          ordersCount={orders.data?.length ?? 0}
-          blockedReason={blockedReason}
-          notify={setToast}
-          onCart={() => setPanel('cart')}
-          onOrders={() => setPanel('orders')}
-        />
-      )}
+      <BottomBar
+        menu={menu}
+        ordersCount={orders.data?.length ?? 0}
+        blockedReason={blockedReason}
+        notify={setToast}
+        onCart={() => setPanel('cart')}
+        onOrders={() => setPanel('orders')}
+      />
       {toast && <Toast text={toast} onDone={clearToast} />}
 
       {panel === 'cart' && (
@@ -197,7 +214,6 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
           groups={openItem.modifier_group_ids.map((id) => groupsById.get(id)!).filter(Boolean)}
           currency={restaurant.currency}
           fallbackLang={fallback}
-          viewOnly={preview}
           onClose={closeSheet}
         />
       )}

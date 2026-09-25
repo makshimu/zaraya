@@ -4,6 +4,15 @@ import { tr } from '../../../shared/localized'
 import { LangContext } from '../i18n'
 import type { GuestCategory } from '../types'
 
+/** Smooth-scroll a category section to just under the sticky header. */
+export function scrollToCategory(id: number) {
+  const section = document.getElementById(`cat-${id}`)
+  const header = document.querySelector('header')
+  if (!section) return
+  const top = section.getBoundingClientRect().top + window.scrollY - (header?.offsetHeight ?? 0)
+  window.scrollTo({ top, behavior: 'smooth' })
+}
+
 /** Horizontal category chips; tapping scrolls to the section, scrolling highlights the chip. */
 export default function CategoryStrip({
   categories,
@@ -29,11 +38,7 @@ export default function CategoryStrip({
 
   function jump(e: React.MouseEvent, id: number) {
     e.preventDefault()
-    const section = document.getElementById(`cat-${id}`)
-    const header = document.querySelector('header')
-    if (!section) return
-    const top = section.getBoundingClientRect().top + window.scrollY - (header?.offsetHeight ?? 0)
-    window.scrollTo({ top, behavior: 'smooth' })
+    scrollToCategory(id)
   }
 
   return (

@@ -120,7 +120,7 @@
     "priceName": "Lựa chọn (cỡ/phần)",
     "amount": "Giá",
     "default": "mặc định",
-    "modifierGroups": "Nhóm tuỳ chọn",
+    "modifierGroups": "Danh mục topping",
     "modifiers": "Tuỳ chọn",
     "addModifier": "Thêm tuỳ chọn",
     "noModifiers": "Chưa có tuỳ chọn",
@@ -139,7 +139,12 @@
     "previewLanguage": "Ngôn ngữ xem trước",
     "previewReload": "Tải lại xem trước",
     "translations": "Bản dịch",
-    "mainLanguage": "ngôn ngữ chính"
+    "mainLanguage": "ngôn ngữ chính",
+    "previewOpen": "Xem trước",
+    "showInPreview": "Xem trong bản xem trước",
+    "hiddenFromGuests": "Đã tắt — khách không thấy",
+    "previewOpenTab": "Mở trong tab mới",
+    "priceBlock": "Giá"
   },
   "badges": {
     "spicy": "Cay",

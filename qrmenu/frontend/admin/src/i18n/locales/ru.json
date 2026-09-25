@@ -142,7 +142,12 @@
     "previewLanguage": "Язык превью",
     "previewReload": "Обновить превью",
     "translations": "Переводы",
-    "mainLanguage": "основной язык"
+    "mainLanguage": "основной язык",
+    "previewOpen": "Предпросмотр",
+    "showInPreview": "Показать в превью",
+    "hiddenFromGuests": "Выключено — гости не видят",
+    "previewOpenTab": "Открыть в новой вкладке",
+    "priceBlock": "Цена"
   },
   "badges": {
     "spicy": "Острое",

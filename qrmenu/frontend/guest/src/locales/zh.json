@@ -65,5 +65,6 @@
   "pay.cash": "现金",
   "pay.card": "刷卡",
   "pay.qr": "二维码转账",
-  "tableNotOpen": "请让服务员开台，之后即可点餐"
+  "tableNotOpen": "请让服务员开台，之后即可点餐",
+  "previewNotice": "这是预览——订单和呼叫不会被发送"
 }

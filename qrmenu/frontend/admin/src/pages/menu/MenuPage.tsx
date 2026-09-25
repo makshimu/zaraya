@@ -1,5 +1,5 @@
-import { Clock, ImageIcon, Pencil, Plus, Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Clock, Eye, EyeOff, ImageIcon, Pencil, Plus, Search, Smartphone } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useMenu, usePatchCategory, usePatchItem, useReorder } from '../../api/menu'
@@ -7,13 +7,29 @@ import type { Category, Item, ModifierGroup } from '../../api/types'
 import { useAuth } from '../../auth/AuthContext'
 import { DragHandle, SortableItem, SortableList } from '../../components/Sortable'
 import Toggle from '../../components/Toggle'
+import Modal from '../../components/Modal'
 import { btn, input } from '../../components/ui'
 import { formatMoney } from '../../../../shared/money'
 import CategoryModal from './CategoryModal'
 import GroupModal from './GroupModal'
 import ItemModal from './ItemModal'
-import PhonePreview from './PhonePreview'
+import PhonePreview, { type PreviewRequest, type PreviewTarget } from './PhonePreview'
 import { useContentLocale } from './shared'
+
+/** The preview column shows from 1024px; below that it opens in a dialog. */
+function useWide() {
+  const query = '(min-width: 1024px)'
+  const [wide, setWide] = useState(() => window.matchMedia(query).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const onChange = () => setWide(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return wide
+}
+
+type ShowInPreview = (target: PreviewTarget) => void
 
 type Editing =
   | { kind: 'category'; category: Category | null }
@@ -29,6 +45,16 @@ export default function MenuPage() {
   const [tab, setTab] = useState<'menu' | 'groups'>('menu')
   const [query, setQuery] = useState('')
   const [editing, setEditing] = useState<Editing | null>(null)
+  const wide = useWide()
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewRequest, setPreviewRequest] = useState<PreviewRequest | null>(null)
+  const showInPreview = useCallback<ShowInPreview>(
+    (target) => {
+      setPreviewRequest((prev) => ({ target, seq: (prev?.seq ?? 0) + 1 }))
+      if (!wide) setPreviewOpen(true)
+    },
+    [wide],
+  )
 
   const data = menu.data
   const q = query.trim().toLowerCase()
@@ -109,6 +135,7 @@ export default function MenuPage() {
                       isAdmin={isAdmin}
                       canSort={canSort}
                       onEdit={setEditing}
+                      onPreview={showInPreview}
                     />
                   </SortableItem>
                 ))}
@@ -135,9 +162,25 @@ export default function MenuPage() {
         )}
         {editing?.kind === 'group' && <GroupModal group={editing.group} onClose={() => setEditing(null)} />}
       </div>
-      <aside className="hidden w-[360px] shrink-0 xl:block">
-        <PhonePreview />
-      </aside>
+      {wide ? (
+        <aside className="sticky top-6 w-[340px] shrink-0 xl:w-[380px]">
+          <PhonePreview request={previewRequest} />
+        </aside>
+      ) : (
+        <>
+          <button
+            className={`${btn.primary} fixed right-6 bottom-6 z-30 shadow-lg`}
+            onClick={() => setPreviewOpen(true)}
+          >
+            <Smartphone className="size-4" /> {t('menu.previewOpen')}
+          </button>
+          {previewOpen && (
+            <Modal title={t('menu.preview')} onClose={() => setPreviewOpen(false)}>
+              <PhonePreview request={previewRequest} />
+            </Modal>
+          )}
+        </>
+      )}
     </div>
   )
 }
@@ -160,6 +203,17 @@ function Thumb({ url }: { url: string | undefined }) {
   )
 }
 
+function PreviewButton({ hidden, onClick }: { hidden: boolean; onClick: () => void }) {
+  const { t } = useTranslation()
+  // A switched-off dish or category isn't in the guest menu, so there is nothing to show
+  const label = t(hidden ? 'menu.hiddenFromGuests' : 'menu.showInPreview')
+  return (
+    <button className={btn.icon} disabled={hidden} onClick={onClick} aria-label={label} title={label}>
+      {hidden ? <EyeOff className="size-4 text-slate-300" /> : <Eye className="size-4" />}
+    </button>
+  )
+}
+
 function CategoryBlock({
   category,
   items,
@@ -167,6 +221,7 @@ function CategoryBlock({
   isAdmin,
   canSort,
   onEdit,
+  onPreview,
 }: {
   category: Category
   items: Item[]
@@ -174,6 +229,7 @@ function CategoryBlock({
   isAdmin: boolean
   canSort: boolean
   onEdit: (e: Editing) => void
+  onPreview: ShowInPreview
 }) {
   const { t } = useTranslation()
   const content = useContentLocale()
@@ -196,6 +252,10 @@ function CategoryBlock({
           )}
         </div>
         <Status enabled={category.is_enabled} />
+        <PreviewButton
+          hidden={!category.is_enabled || items.every((i) => !i.is_enabled)}
+          onClick={() => onPreview({ type: 'show-category', categoryId: category.id })}
+        />
         {isAdmin && (
           <>
             <Toggle
@@ -222,7 +282,14 @@ function CategoryBlock({
         >
           {items.map((item) => (
             <SortableItem key={item.id} id={item.id} className="rounded-xl bg-white">
-              <ItemRow item={item} groupsById={groupsById} isAdmin={isAdmin} onEdit={onEdit} />
+              <ItemRow
+                item={item}
+                categoryEnabled={category.is_enabled}
+                groupsById={groupsById}
+                isAdmin={isAdmin}
+                onEdit={onEdit}
+                onPreview={onPreview}
+              />
             </SortableItem>
           ))}
         </SortableList>
@@ -242,35 +309,63 @@ function CategoryBlock({
 function Status({ enabled }: { enabled: boolean }) {
   const { t } = useTranslation()
   return (
-    <span className="hidden items-center gap-2 text-sm text-slate-600 sm:flex">
+    <span className="mr-1 hidden items-center gap-2 text-sm whitespace-nowrap text-slate-600 xl:flex">
       <span className={`size-2 rounded-full ${enabled ? 'bg-green-500' : 'bg-slate-300'}`} />
       {t(enabled ? 'menu.enabled' : 'menu.disabled')}
     </span>
   )
 }
 
+/** A grey block under the dish name: a label with an edit pencil, then its content. */
+function Panel({ label, onEdit, children }: { label: string; onEdit?: () => void; children?: React.ReactNode }) {
+  const { t } = useTranslation()
+  return (
+    <div className="rounded-lg bg-slate-50 px-3 py-2">
+      <div className="flex items-center gap-2 text-sm text-slate-700">
+        {label}
+        {onEdit && (
+          <button
+            className="rounded p-0.5 text-slate-400 hover:text-slate-700"
+            onClick={onEdit}
+            aria-label={t('common.edit')}
+          >
+            <Pencil className="size-3.5" />
+          </button>
+        )}
+      </div>
+      {children && <div className="mt-1.5">{children}</div>}
+    </div>
+  )
+}
+
 function ItemRow({
   item,
+  categoryEnabled,
   groupsById,
   isAdmin,
   onEdit,
+  onPreview,
 }: {
   item: Item
+  categoryEnabled: boolean
   groupsById: Map<number, ModifierGroup>
   isAdmin: boolean
   onEdit: (e: Editing) => void
+  onPreview: ShowInPreview
 }) {
   const { t } = useTranslation()
   const content = useContentLocale()
   const patch = usePatchItem()
+  const edit = isAdmin ? () => onEdit({ kind: 'item', item, categoryId: item.category_id }) : undefined
 
   return (
     <div className="flex items-start gap-3 py-2" data-testid="item">
       <DragHandle label={t('menu.drag')} />
       <Thumb url={item.image_urls?.w400} />
-      <div className="min-w-0 flex-1 space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={`font-medium ${item.is_enabled ? '' : 'text-slate-400'}`}>{content.t(item.name)}</span>
+      <div className="min-w-0 flex-1 space-y-1.5">
+        {/* name and badges, with the controls on the same line (they wrap under it when narrow) */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className={`font-semibold ${item.is_enabled ? '' : 'text-slate-400'}`}>{content.t(item.name)}</span>
           {!item.is_available && (
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">{t('menu.outOfStock')}</span>
           )}
@@ -279,40 +374,62 @@ function ItemRow({
               {t(`badges.${b}`)}
             </span>
           ))}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {item.prices.map((p) => (
-            <span key={p.id} className="rounded-lg bg-violet-600 px-3 py-1 text-sm text-white">
-              {formatMoney(p.amount, content.currency, content.lang)}
-              {content.t(p.name) && ` · ${content.t(p.name)}`}
-              {p.is_default && item.prices.length > 1 && ` (${t('menu.default')})`}
-            </span>
-          ))}
-        </div>
-        {item.modifier_group_ids.length > 0 && (
-          <div className="text-sm text-slate-500">
-            {t('menu.modifierGroups')}:{' '}
-            {item.modifier_group_ids.map((id) => content.t(groupsById.get(id)?.name)).join(', ')}
+          <div className="ml-auto flex items-center gap-1">
+            <Status enabled={item.is_enabled} />
+            <PreviewButton
+              hidden={!item.is_enabled || !categoryEnabled}
+              onClick={() => onPreview({ type: 'show-item', itemId: item.id })}
+            />
+            {isAdmin && (
+              <>
+                <Toggle
+                  checked={item.is_enabled}
+                  label={t('menu.enabled')}
+                  onChange={(is_enabled) => patch.mutate({ id: item.id, is_enabled })}
+                />
+                <button className={btn.icon} onClick={edit} aria-label={t('common.edit')}>
+                  <Pencil className="size-4" />
+                </button>
+              </>
+            )}
           </div>
-        )}
+        </div>
+        <Panel label={t('menu.priceBlock')} onEdit={edit}>
+          <div className="flex flex-wrap gap-2">
+            {item.prices.map((p) => (
+              <span
+                key={p.id}
+                className="rounded-lg bg-violet-600 px-3 py-1 text-sm text-white"
+                data-testid="price-chip"
+              >
+                {formatMoney(p.amount, content.currency, content.lang)}
+                {content.t(p.name) && ` · ${content.t(p.name)}`}
+                {p.is_default && ` (${t('menu.default')})`}
+              </span>
+            ))}
+          </div>
+        </Panel>
+        <Panel label={t('menu.modifierGroups')} onEdit={edit}>
+          {item.modifier_group_ids.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {item.modifier_group_ids.map((id) => {
+                const group = groupsById.get(id)
+                return (
+                  <span
+                    key={id}
+                    className="rounded-md bg-white px-2 py-0.5 text-sm text-slate-600 ring-1 ring-slate-200"
+                  >
+                    {content.t(group?.name)}
+                    {group && group.modifiers.length > 0 && (
+                      <span className="text-slate-400"> · {group.modifiers.length}</span>
+                    )}
+                  </span>
+                )
+              })}
+            </div>
+          )}
+        </Panel>
       </div>
-      <Status enabled={item.is_enabled} />
-      {isAdmin && (
-        <>
-          <Toggle
-            checked={item.is_enabled}
-            label={t('menu.enabled')}
-            onChange={(is_enabled) => patch.mutate({ id: item.id, is_enabled })}
-          />
-          <button
-            className={btn.icon}
-            onClick={() => onEdit({ kind: 'item', item, categoryId: item.category_id })}
-            aria-label={t('common.edit')}
-          >
-            <Pencil className="size-4" />
-          </button>
-        </>
-      )}
     </div>
   )
 }

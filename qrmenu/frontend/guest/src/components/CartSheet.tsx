@@ -6,6 +6,7 @@ import { formatMoney } from '../../../shared/money'
 import { OrderError, placeOrder } from '../api'
 import { resolveLines, useCart } from '../cart'
 import { LangContext, useT } from '../i18n'
+import { isPreview } from '../preview'
 import type { GuestMenu, GuestOrder } from '../types'
 import { MinusIcon, PlusIcon, XIcon } from './icons'
 import Sheet from './Sheet'
@@ -16,6 +17,7 @@ function newKey() {
 }
 
 const ERRORS: Record<string, string> = {
+  preview: 'previewNotice',
   item_unavailable: 'errItemUnavailable',
   price_invalid: 'errItemUnavailable',
   modifier_invalid: 'errItemUnavailable',
@@ -67,6 +69,10 @@ export default function CartSheet({
   async function submit() {
     // A double tap fires twice before React re-renders the disabled button
     if (inFlight.current) return
+    if (isPreview) {
+      setError({ code: 'preview' })
+      return
+    }
     inFlight.current = true
     if (!attempt.current || attempt.current.signature !== signature) {
       attempt.current = { key: newKey(), signature }

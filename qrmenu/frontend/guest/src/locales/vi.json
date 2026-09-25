@@ -65,5 +65,6 @@
   "pay.cash": "Tiền mặt",
   "pay.card": "Thẻ",
   "pay.qr": "Chuyển khoản QR",
-  "tableNotOpen": "Vui lòng nhờ nhân viên mở bàn — sau đó bạn có thể gọi món"
+  "tableNotOpen": "Vui lòng nhờ nhân viên mở bàn — sau đó bạn có thể gọi món",
+  "previewNotice": "Đây là bản xem trước — đơn và yêu cầu không được gửi đi"
 }
