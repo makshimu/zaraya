@@ -17,7 +17,7 @@ export default function Header({
   tableNumber: string | null
   query: string
   onQuery: (q: string) => void
-  onBack: () => void
+  onBack?: () => void
 }) {
   const t = useT()
   const { lang } = useContext(LangContext)
@@ -42,9 +42,11 @@ export default function Header({
         </label>
       ) : (
         <>
-          <button aria-label={t('back')} onClick={onBack} className={round} data-testid="back-home">
-            <ChevronLeftIcon className="size-5" />
-          </button>
+          {onBack && (
+            <button aria-label={t('back')} onClick={onBack} className={round} data-testid="back-home">
+              <ChevronLeftIcon className="size-5" />
+            </button>
+          )}
           <div className="min-w-0 flex-1 pl-1">
             <div className="truncate font-serif text-lg leading-tight font-bold">{name}</div>
             {tableNumber && <div className="text-sm text-muted">{t('table', { number: tableNumber })}</div>}

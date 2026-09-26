@@ -5,23 +5,47 @@ import { useTranslation } from 'react-i18next'
 import { tokenStore } from './api/client'
 import type { Order, StaffCall } from './api/types'
 
+/** A new order or call, shown as a pop-up in the corner of any admin page. */
+export interface LiveAlert {
+  id: string
+  kind: 'order' | 'call'
+  title: string
+  body: string
+}
+
 interface RealtimeState {
   connected: boolean
+  soundOn: boolean
   notificationsOn: boolean
   enableNotifications: () => Promise<void>
+  alerts: LiveAlert[]
+  dismissAlert: (id: string) => void
 }
 
 const RealtimeContext = createContext<RealtimeState>({
   connected: false,
+  soundOn: false,
   notificationsOn: false,
   enableNotifications: async () => {},
+  alerts: [],
+  dismissAlert: () => {},
 })
 
+const ALERT_MS = 10_000
+const notificationsSupported = typeof Notification !== 'undefined'
+
+// Browsers keep sound off until the page gets a click or key press; the context is created at
+// once and resumed by the first interaction anywhere, not only by the "enable" button
 let audio: AudioContext | null = null
+function getAudio() {
+  audio ??= new AudioContext()
+  return audio
+}
 
 /** Short two-tone chime; no audio file to load. */
 function chime() {
-  audio ??= new AudioContext()
+  const audio = getAudio()
+  if (audio.state === 'suspended') void audio.resume()
   const now = audio.currentTime
   for (const [i, freq] of [880, 1320].entries()) {
     const osc = audio.createOscillator()
@@ -45,10 +69,28 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   const [connected, setConnected] = useState(false)
   const [notificationsOn, setNotificationsOn] = useState(
-    () => typeof Notification !== 'undefined' && Notification.permission === 'granted',
+    () => !notificationsSupported || Notification.permission !== 'default',
   )
+  const [soundOn, setSoundOn] = useState(() => getAudio().state === 'running')
+  const [alerts, setAlerts] = useState<LiveAlert[]>([])
   const tRef = useRef(t)
   tRef.current = t
+
+  const dismissAlert = useCallback((id: string) => setAlerts((list) => list.filter((a) => a.id !== id)), [])
+
+  useEffect(() => {
+    const audio = getAudio()
+    const sync = () => setSoundOn(audio.state === 'running')
+    const unlock = () => void audio.resume().then(sync)
+    audio.addEventListener('statechange', sync)
+    window.addEventListener('pointerdown', unlock)
+    window.addEventListener('keydown', unlock)
+    return () => {
+      audio.removeEventListener('statechange', sync)
+      window.removeEventListener('pointerdown', unlock)
+      window.removeEventListener('keydown', unlock)
+    }
+  }, [])
 
   useEffect(() => {
     let ws: WebSocket | null = null
@@ -56,24 +98,29 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     let timer: ReturnType<typeof setTimeout> | undefined
     let stopped = false
 
-    const alert = (title: string, body: string, tag: string) => {
+    const alert = (kind: LiveAlert['kind'], title: string, body: string, tag: string) => {
       try {
         chime()
       } catch {
-        /* audio blocked until the first click */
+        /* no audio on this device */
       }
-      if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden) {
+      setAlerts((list) => [{ id: tag, kind, title, body }, ...list.filter((a) => a.id !== tag)].slice(0, 4))
+      setTimeout(() => setAlerts((list) => list.filter((a) => a.id !== tag)), ALERT_MS)
+      // Another tab or window in front: the system notification is what gets noticed
+      if (notificationsSupported && Notification.permission === 'granted' && document.hidden) {
         new Notification(title, { body, tag })
       }
     }
     const onNewOrder = (order: Order) =>
       alert(
+        'order',
         tRef.current('orders.newOrderTitle', { table: order.table_number }),
         tRef.current('orders.newOrderBody', { count: order.items.length }),
         `order-${order.id}`,
       )
     const onNewCall = (call: StaffCall) =>
       alert(
+        'call',
         tRef.current(`hall.callTitle.${call.type}`, { table: call.table_number }),
         call.payment_method ? tRef.current(`hall.pay.${call.payment_method}`) : '',
         `call-${call.id}`,
@@ -131,15 +178,19 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   }, [qc])
 
   const enableNotifications = useCallback(async () => {
-    audio ??= new AudioContext()
-    await audio.resume() // user gesture: unlocks sound for later events
-    if (typeof Notification !== 'undefined') {
-      setNotificationsOn((await Notification.requestPermission()) === 'granted')
+    await getAudio().resume() // user gesture: unlocks sound for later events
+    setSoundOn(getAudio().state === 'running')
+    chime() // so staff hear what a new order sounds like
+    if (notificationsSupported && Notification.permission === 'default') {
+      await Notification.requestPermission()
     }
+    setNotificationsOn(true)
   }, [])
 
   return (
-    <RealtimeContext.Provider value={{ connected, notificationsOn, enableNotifications }}>
+    <RealtimeContext.Provider
+      value={{ connected, soundOn, notificationsOn, enableNotifications, alerts, dismissAlert }}
+    >
       {children}
     </RealtimeContext.Provider>
   )

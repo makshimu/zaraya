@@ -36,7 +36,8 @@
     "delete": "Xoá",
     "edit": "Sửa",
     "loading": "Đang tải…",
-    "confirmDelete": "Xoá “{{name}}”?"
+    "confirmDelete": "Xoá “{{name}}”?",
+    "close": "Đóng"
   },
   "errors": {
     "unknown_error": "Đã có lỗi xảy ra",
@@ -90,7 +91,8 @@
     "copyLink": "Sao chép liên kết",
     "copied": "Đã sao chép",
     "printPdf": "PDF để in",
-    "printHallPdf": "PDF cho khu vực này"
+    "printHallPdf": "PDF cho khu vực này",
+    "tablesQr": "Mã QR các bàn"
   },
   "menu": {
     "title": "Thực đơn số của tôi",
@@ -157,7 +159,6 @@
     "title": "Cài đặt",
     "restaurant": "Nhà hàng",
     "name": "Tên",
-    "logo": "Logo",
     "currency": "Tiền tệ (mã ISO)",
     "timezone": "Múi giờ",
     "languages": "Ngôn ngữ thực đơn",
@@ -180,29 +181,7 @@
     "telegramTest": "Gửi tin nhắn thử",
     "telegramSaveFirst": "Hãy lưu token và ID nhóm trước",
     "telegramTestOk": "Đã gửi — hãy kiểm tra nhóm chat",
-    "telegramTestFailed": "Telegram báo lỗi: {{error}}",
-    "guestHome": "Màn hình chính của khách",
-    "guestHomeHint": "Khách thấy màn hình này ngay sau khi quét mã QR: tên, khẩu hiệu, ảnh nền, Wi‑Fi và giờ mở cửa.",
-    "tagline": "Khẩu hiệu",
-    "cover": "Ảnh nền",
-    "coverHint": "Ảnh ngang của không gian quán hoặc món ăn; tên nhà hàng sẽ hiển thị phía trên.",
-    "wifiName": "Tên mạng Wi‑Fi",
-    "wifiPassword": "Mật khẩu Wi‑Fi",
-    "wifiHint": "Để trống tên mạng nếu không muốn hiển thị Wi‑Fi cho khách.",
-    "showHours": "Hiển thị giờ mở cửa",
-    "opens": "mở cửa",
-    "closes": "đóng cửa",
-    "dayOff": "Nghỉ",
-    "sameEveryDay": "Áp dụng giờ thứ Hai cho mọi ngày",
-    "weekday": {
-      "mon": "Thứ Hai",
-      "tue": "Thứ Ba",
-      "wed": "Thứ Tư",
-      "thu": "Thứ Năm",
-      "fri": "Thứ Sáu",
-      "sat": "Thứ Bảy",
-      "sun": "Chủ Nhật"
-    }
+    "telegramTestFailed": "Telegram báo lỗi: {{error}}"
   },
   "realtime": {
     "online": "Trực tuyến",
@@ -366,5 +345,35 @@
     "tooltipHour": "{{hour}}:00 — {{orders}}, {{revenue}}",
     "tooltipCell": "{{day}}, {{hour}}:00 — {{orders}}",
     "tooltipDay": "{{date}} — {{orders}}, {{revenue}}"
+  },
+  "welcome": {
+    "tagline": "Khẩu hiệu",
+    "cover": "Ảnh nền",
+    "coverHint": "Ảnh ngang của không gian quán hoặc món ăn; tên nhà hàng sẽ hiển thị phía trên.",
+    "wifiName": "Tên mạng Wi‑Fi",
+    "wifiPassword": "Mật khẩu Wi‑Fi",
+    "wifiHint": "Để trống tên mạng nếu không muốn hiển thị Wi‑Fi cho khách.",
+    "showHours": "Hiển thị giờ mở cửa",
+    "opens": "mở cửa",
+    "closes": "đóng cửa",
+    "dayOff": "Nghỉ",
+    "sameEveryDay": "Áp dụng giờ thứ Hai cho mọi ngày",
+    "weekday": {
+      "mon": "Thứ Hai",
+      "tue": "Thứ Ba",
+      "wed": "Thứ Tư",
+      "thu": "Thứ Năm",
+      "fri": "Thứ Sáu",
+      "sat": "Thứ Bảy",
+      "sun": "Chủ Nhật"
+    },
+    "title": "Màn hình chào mừng",
+    "hint": "Màn hình đầu tiên khách thấy sau khi quét mã QR trên bàn. Bên phải là giao diện trên điện thoại: thay đổi hiện ngay, khách thấy sau khi bấm Lưu. Tên nhà hàng và ngôn ngữ nằm trong Cài đặt.",
+    "logo": "Logo",
+    "saved": "Đã lưu — khách đã thấy",
+    "menuQr": "Mã QR thực đơn",
+    "menuQrHint": "Liên kết thực đơn không gắn bàn: cho cửa ra vào, tủ kính, mạng xã hội. Khách xem được thực đơn; gọi món cần mã QR trên bàn.",
+    "localTitle": "Mã QR đang dẫn tới {{url}} — điện thoại không mở được",
+    "localHint": "localhost chính là máy tính này. Để thử bằng điện thoại cùng Wi‑Fi, ghi địa chỉ mạng của máy tính vào .env rồi khởi động lại: docker compose up -d. Trên máy chủ, dùng tên miền của bạn (https://…)."
   }
 }

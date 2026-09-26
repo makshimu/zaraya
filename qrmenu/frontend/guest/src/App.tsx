@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import { tr } from '../../shared/localized'
-import { GUEST_SOURCE, isPreviewCommand } from '../../shared/preview'
+import { GUEST_SOURCE, isPreviewCommand, type RestaurantDraft } from '../../shared/preview'
 import { useMenu, useOrders, useSession } from './api'
 import { CartProvider, resolveLines, useCart } from './cart'
 import CartSheet from './components/CartSheet'
@@ -16,7 +16,7 @@ import SessionBanner, { SESSION_MESSAGES } from './components/SessionBanner'
 import Toast from './components/Toast'
 import { formatMoney } from '../../shared/money'
 import { LangContext, pickLanguage, saveLanguage, translate, useT } from './i18n'
-import { isPreview, previewLang } from './preview'
+import { isPreview, previewLang, previewView } from './preview'
 import { useGuestRealtime } from './realtime'
 import type { GuestItem, GuestMenu, GuestSession } from './types'
 
@@ -93,9 +93,12 @@ type View = 'home' | 'menu'
 /** Home and menu are two screens of one page: the menu gets its own history entry, so the phone's
  * Back button returns to the home screen. */
 function useView(): [View, (v: View) => void] {
-  const [view, setViewState] = useState<View>(() => (history.state?.view === 'menu' ? 'menu' : 'home'))
+  const [view, setViewState] = useState<View>(() =>
+    history.state?.view === 'menu' || (isPreview && previewView === 'menu') ? 'menu' : 'home',
+  )
   useEffect(() => {
-    const onPop = () => setViewState(history.state?.view === 'menu' ? 'menu' : 'home')
+    const onPop = () =>
+      setViewState(history.state?.view === 'menu' || (isPreview && previewView === 'menu') ? 'menu' : 'home')
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
@@ -107,8 +110,14 @@ function useView(): [View, (v: View) => void] {
   return [view, setView]
 }
 
-function GuestScreen({ menu }: { menu: GuestMenu }) {
+function GuestScreen({ menu: loaded }: { menu: GuestMenu }) {
   const [view, setView] = useView()
+  // In the admin's preview, unsaved welcome-screen settings are shown on top of the saved ones
+  const [draft, setDraft] = useState<RestaurantDraft | null>(null)
+  const menu = useMemo(
+    () => (draft ? { ...loaded, restaurant: { ...loaded.restaurant, ...draft } } : loaded),
+    [loaded, draft],
+  )
   const t = useT()
   const { lang } = useContext(LangContext)
   const session = useSession()
@@ -153,6 +162,10 @@ function GuestScreen({ menu }: { menu: GuestMenu }) {
     if (!isPreview) return
     const onMessage = (e: MessageEvent) => {
       if (e.origin !== location.origin || !isPreviewCommand(e.data)) return
+      if (e.data.type === 'restaurant-draft') {
+        setDraft(e.data.restaurant)
+        return
+      }
       setPanel(null)
       setQuery('')
       setView('menu')
@@ -197,7 +210,8 @@ function GuestScreen({ menu }: { menu: GuestMenu }) {
               tableNumber={tableNumber}
               query={query}
               onQuery={setQuery}
-              onBack={() => setView('home')}
+              // the admin's menu page previews the menu alone
+              onBack={isPreview && previewView === 'menu' ? undefined : () => setView('home')}
             />
             <CategoryStrip categories={categories} active={active} fallbackLang={fallback} />
           </header>

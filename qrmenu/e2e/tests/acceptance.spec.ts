@@ -73,6 +73,7 @@ test('order a dish with a topping → the order shows up in the staff panel with
   await expect(feed).toBeVisible({ timeout: 2000 })
   expect(Date.now() - started).toBeLessThan(2000)
   expect(await chimes(staff)).toBeGreaterThan(before)
+  await expect(staff.getByTestId('live-alert').filter({ hasText: `e2e-${seed.tag}` })).toBeVisible()
 
   // the guest follows the status live
   await expect(guest.getByTestId('order-status').first()).toContainText('Ждёт подтверждения')
@@ -150,7 +151,6 @@ test('switch a dish off → it disappears for the guest and in the live preview 
 
   const staff = await adminPage(browser, baseURL, '/admin/menu')
   const preview = staff.frameLocator('[data-testid=phone-preview] iframe')
-  await openMenu(preview)
   await expect(preview.getByText(`Кофе ${seed.tag}`)).toBeVisible()
 
   await staff

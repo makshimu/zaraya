@@ -66,7 +66,7 @@ async def scan_qr(token: str, db: DB) -> RedirectResponse:
         create_guest_token(session.id, session.expires_at),
         max_age=int((session.expires_at - session.created_at).total_seconds()) + 24 * 3600,
         httponly=True,
-        secure=settings.guest_cookie_secure,
+        secure=settings.cookie_secure,
         samesite="lax",
         path="/",
     )

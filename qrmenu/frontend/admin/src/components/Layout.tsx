@@ -1,7 +1,19 @@
-import { BarChart3, Bell, BookOpen, LayoutGrid, LogOut, QrCode, Receipt, Settings, UserCog } from 'lucide-react'
+import {
+  BarChart3,
+  Bell,
+  BellRing,
+  BookOpen,
+  LayoutGrid,
+  LogOut,
+  QrCode,
+  Receipt,
+  Settings,
+  UserCog,
+  X,
+} from 'lucide-react'
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import { useOpenCalls } from '../api/hall'
 import { useOrders } from '../api/orders'
@@ -76,7 +88,7 @@ export default function Layout() {
             <span className={`size-2 rounded-full ${realtime.connected ? 'bg-green-500' : 'bg-red-400'}`} />
             {t(realtime.connected ? 'realtime.online' : 'realtime.offline')}
           </span>
-          {!realtime.notificationsOn && (
+          {(!realtime.soundOn || !realtime.notificationsOn) && (
             <button
               onClick={realtime.enableNotifications}
               className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50"
@@ -93,6 +105,55 @@ export default function Layout() {
           </Suspense>
         </main>
       </div>
+      <LiveAlerts />
+    </div>
+  )
+}
+
+/** New orders and calls pop up in the corner of whatever page is open, together with the chime. */
+function LiveAlerts() {
+  const { alerts, dismissAlert } = useRealtime()
+  const navigate = useNavigate()
+  const { t } = useTranslation()
+  if (!alerts.length) return null
+  return (
+    <div className="fixed top-16 right-4 z-50 flex w-80 flex-col gap-2" aria-live="assertive">
+      {alerts.map((a) => (
+        <div
+          key={a.id}
+          role="alert"
+          data-testid="live-alert"
+          className={`flex animate-[pop_0.25s_ease-out] cursor-pointer items-start gap-3 rounded-xl border bg-white p-3 shadow-lg ${
+            a.kind === 'order' ? 'border-blue-200' : 'border-amber-300'
+          }`}
+          onClick={() => {
+            dismissAlert(a.id)
+            navigate('/hall')
+          }}
+        >
+          <span
+            className={`flex size-9 shrink-0 items-center justify-center rounded-full ${
+              a.kind === 'order' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'
+            }`}
+          >
+            {a.kind === 'order' ? <Receipt className="size-5" /> : <BellRing className="size-5" />}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">{a.title}</span>
+            {a.body && <span className="block text-sm text-slate-500">{a.body}</span>}
+          </span>
+          <button
+            aria-label={t('common.close')}
+            className="rounded p-1 text-slate-400 hover:bg-slate-100"
+            onClick={(e) => {
+              e.stopPropagation()
+              dismissAlert(a.id)
+            }}
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      ))}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 /** The live phone preview on the admin menu page: fully clickable, but it never sends anything. */
 import { expect, test } from '@playwright/test'
 
-import { adminPage, closeContexts, openMenu, Seed } from './helpers'
+import { adminPage, closeContexts, openMenu, phone, Seed } from './helpers'
 
 let seed: Seed
 let data: Awaited<ReturnType<Seed['menuAndTable']>>
@@ -70,6 +70,33 @@ test('the preview follows menu edits live and switches language', async ({ brows
   await expect(preview.getByText(`Латте ${seed.tag}`)).toBeVisible({ timeout: 3000 })
 
   await staff.getByLabel('Язык превью').selectOption('en')
-  await openMenu(preview)
   await expect(preview.getByText(`Latte ${seed.tag}`)).toBeVisible()
+})
+
+test('welcome screen on the QR page: edits show in the phone at once, guests get them on save', async ({
+  browser,
+  baseURL,
+}) => {
+  await seed.settings({}) // restore the welcome screen afterwards
+  const staff = await adminPage(browser, baseURL, '/admin/tables')
+  const section = staff.getByTestId('welcome-section')
+  const preview = section.frameLocator('[data-testid=phone-preview] iframe')
+  await expect(preview.getByTestId('open-menu')).toBeVisible()
+
+  await section.getByLabel(/название сети/).fill(`Net-${seed.tag}`)
+  await expect(preview.getByTestId('info-card')).toContainText(`Net-${seed.tag}`)
+
+  const guest = await phone(browser, baseURL)
+  await guest.goto(data.table.qr_url)
+  await expect(guest.getByTestId('open-menu')).toBeVisible()
+  await expect(guest.getByText(`Net-${seed.tag}`)).toHaveCount(0) // not saved yet
+
+  await section.getByRole('button', { name: 'Сохранить' }).click()
+  await expect(section.getByText('Сохранено')).toBeVisible()
+  await expect(guest.getByTestId('info-card')).toContainText(`Net-${seed.tag}`, { timeout: 3000 })
+
+  // the menu's own QR is there too; from the preview the guest walks into the menu
+  await expect(section.getByTestId('menu-link').getByRole('img')).toBeVisible()
+  await openMenu(preview)
+  await expect(preview.getByText(`Шакшука ${seed.tag}`)).toBeVisible()
 })

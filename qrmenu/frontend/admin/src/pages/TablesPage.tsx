@@ -19,6 +19,7 @@ import type { Hall, Table, TableInput } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import Modal from '../components/Modal'
 import { btn, input, label } from '../components/ui'
+import WelcomeSection, { LocalUrlWarning } from './WelcomeSection'
 
 function useErrorText() {
   const { t } = useTranslation()
@@ -50,8 +51,12 @@ export default function TablesPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-semibold">{t('tables.title')}</h1>
+      <h1 className="mb-6 text-3xl font-semibold">{t('tables.title')}</h1>
+      <LocalUrlWarning />
+      <WelcomeSection />
+
+      <div className="mt-8 mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-2xl font-semibold">{t('tables.tablesQr')}</h2>
         {isAdmin && (
           <div className="flex flex-wrap gap-2">
             <button className={btn.secondary} onClick={() => downloadQrPdf()} disabled={!tables.data?.length}>

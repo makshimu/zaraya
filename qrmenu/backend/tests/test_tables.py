@@ -99,3 +99,32 @@ async def test_waiter_can_view_but_not_edit(admin_client, waiter_client):
         await waiter_client.post(f"/api/admin/tables/{table['id']}/regenerate-token")
     ).status_code == 403
     assert (await waiter_client.post("/api/admin/halls", json={"name": "X"})).status_code == 403
+
+
+async def test_menu_link_and_qr(admin_client, waiter_client):
+    link = (await waiter_client.get("/api/admin/menu-link")).json()
+    assert link["url"].endswith("/") and "/t/" not in link["url"]
+    assert link["url"] == "https://menu.test/" and link["local"] is False
+
+    png = await admin_client.get("/api/admin/menu-link/qr.png")
+    assert png.status_code == 200 and png.content.startswith(b"\x89PNG")
+    assert 'filename="menu.png"' in png.headers["content-disposition"]
+
+
+def test_cookie_secure_follows_public_url():
+    from app.core.config import Settings
+
+    assert Settings(public_base_url="https://cafe.example").cookie_secure is True
+    # a phone on the local network over plain http: a Secure cookie would never come back
+    assert Settings(public_base_url="http://192.168.1.10").cookie_secure is False
+    assert Settings(public_base_url="http://192.168.1.10", guest_cookie_secure=True).cookie_secure is True
+
+
+def test_local_url_detection(monkeypatch):
+    from app.core.config import get_settings
+    from app.services import qr
+
+    monkeypatch.setattr(get_settings(), "public_base_url", "https://localhost")
+    assert qr.is_local_url() is True
+    monkeypatch.setattr(get_settings(), "public_base_url", "http://192.168.1.10")
+    assert qr.is_local_url() is False

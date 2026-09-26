@@ -9,7 +9,7 @@ from app.core.security import new_table_token
 from app.models import Hall, RestaurantSettings, Table
 from app.schemas import HallIn, HallOut, TableIn, TableOut, TableUpdate
 from app.services.audit import audit
-from app.services.qr import render_qr, table_url
+from app.services.qr import is_local_url, menu_url, render_qr, render_url_qr, table_url
 from app.services.qr_pdf import render_tables_pdf
 
 router = APIRouter(tags=["tables"])
@@ -168,4 +168,22 @@ async def table_qr(table_id: int, fmt: Literal["png", "svg"], db: DB, _: Current
         render_qr(table.token, fmt),
         media_type=QR_MEDIA_TYPES[fmt],
         headers={"Content-Disposition": f'attachment; filename="table-{table.number}.{fmt}"'},
+    )
+
+
+# --- the menu link without a table ---
+
+
+@router.get("/menu-link")
+async def menu_link(_: CurrentUser) -> dict:
+    """Where QR codes lead; `local` warns that phones can't reach it (PUBLIC_BASE_URL is localhost)."""
+    return {"url": menu_url(), "local": is_local_url()}
+
+
+@router.get("/menu-link/qr.{fmt}")
+async def menu_link_qr(fmt: Literal["png", "svg"], _: CurrentUser) -> Response:
+    return Response(
+        render_url_qr(menu_url(), fmt),
+        media_type=QR_MEDIA_TYPES[fmt],
+        headers={"Content-Disposition": f'attachment; filename="menu.{fmt}"'},
     )

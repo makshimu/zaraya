@@ -26,9 +26,16 @@ class Settings(BaseSettings):
     media_url_prefix: str = "/media"
     max_upload_mb: int = 10
 
-    # Guest session cookie. Keep secure=True in production (Caddy serves HTTPS)
+    # Guest session cookie. Secure unless the QR codes point at plain http (a phone on the local
+    # network, see README); set explicitly to override
     guest_cookie_name: str = "qr_session"
-    guest_cookie_secure: bool = True
+    guest_cookie_secure: bool | None = None
+
+    @property
+    def cookie_secure(self) -> bool:
+        if self.guest_cookie_secure is not None:
+            return self.guest_cookie_secure
+        return not self.public_base_url.startswith("http://")
 
     table_token_bytes: int = 12  # 12 bytes -> 16 url-safe chars
 

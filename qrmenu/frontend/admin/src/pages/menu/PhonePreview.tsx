@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { languageName } from '../../../../shared/languages'
-import { isGuestReady, PREVIEW_SOURCE, type PreviewCommand } from '../../../../shared/preview'
+import { isGuestReady, PREVIEW_SOURCE, type PreviewCommand, type RestaurantDraft } from '../../../../shared/preview'
 import { useContentLocale } from './shared'
 
 export type PreviewTarget = { type: 'show-item'; itemId: number } | { type: 'show-category'; categoryId: number }
@@ -26,24 +26,37 @@ function useClock() {
 /**
  * The guest menu exactly as guests see it, in a phone. It is the real guest app in preview mode:
  * fully clickable (dishes, options, cart, waiter buttons) but nothing is sent, and it updates
- * live with every change made in the admin.
+ * live with every change made in the admin. `view` picks the screen it opens on: the menu itself
+ * (menu page) or the welcome screen the QR opens (QR page), where `draft` shows unsaved edits.
  */
-export default function PhonePreview({ request }: { request: PreviewRequest | null }) {
+export default function PhonePreview({
+  request = null,
+  view = 'menu',
+  draft,
+}: {
+  request?: PreviewRequest | null
+  view?: 'menu' | 'home'
+  draft?: RestaurantDraft
+}) {
   const { t } = useTranslation()
   const content = useContentLocale()
   const clock = useClock()
   const [lang, setLang] = useState(content.lang)
   const [reloads, setReloads] = useState(0)
   const shownLang = content.languages.includes(lang) ? lang : content.languages[0]
-  const src = `/?preview=1&lang=${encodeURIComponent(shownLang)}`
+  const src = `/?preview=1&view=${view}&lang=${encodeURIComponent(shownLang)}`
 
   const frame = useRef<HTMLIFrameElement>(null)
   const ready = useRef(false)
   const pending = useRef<PreviewTarget | null>(null)
 
-  const send = (target: PreviewTarget) => {
-    const command: PreviewCommand = { source: PREVIEW_SOURCE, ...target }
-    frame.current?.contentWindow?.postMessage(command, location.origin)
+  const latestDraft = useRef(draft)
+  latestDraft.current = draft
+
+  const post = (command: PreviewCommand) => frame.current?.contentWindow?.postMessage(command, location.origin)
+  const send = (target: PreviewTarget) => post({ source: PREVIEW_SOURCE, ...target })
+  const sendDraft = () => {
+    if (latestDraft.current) post({ source: PREVIEW_SOURCE, type: 'restaurant-draft', restaurant: latestDraft.current })
   }
 
   // The guest app says "ready" once its menu is on screen; commands wait for it
@@ -51,6 +64,7 @@ export default function PhonePreview({ request }: { request: PreviewRequest | nu
     const onMessage = (e: MessageEvent) => {
       if (e.origin !== location.origin || e.source !== frame.current?.contentWindow || !isGuestReady(e.data)) return
       ready.current = true
+      sendDraft()
       if (pending.current) send(pending.current)
       pending.current = null
     }
@@ -63,6 +77,10 @@ export default function PhonePreview({ request }: { request: PreviewRequest | nu
     if (ready.current) send(request.target)
     else pending.current = request.target
   }, [request])
+
+  useEffect(() => {
+    if (ready.current) sendDraft()
+  }, [draft])
 
   const reload = () => {
     ready.current = false

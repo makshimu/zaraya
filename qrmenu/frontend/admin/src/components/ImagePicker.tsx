@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next'
 
 import { ApiError } from '../api/client'
 import { uploadImage } from '../api/menu'
+import type { ImageUrls } from '../api/types'
 import { btn } from './ui'
 
 export interface PickedImage {
   key: string | null
   url: string | null
+  urls?: ImageUrls | null // every size of a new upload
 }
 
 export default function ImagePicker({ value, onChange }: { value: PickedImage; onChange: (v: PickedImage) => void }) {
@@ -22,7 +24,7 @@ export default function ImagePicker({ value, onChange }: { value: PickedImage; o
     setError(null)
     try {
       const { key, urls } = await uploadImage(file)
-      onChange({ key, url: urls.w400 })
+      onChange({ key, url: urls.w400, urls })
     } catch (err) {
       setError(t(`errors.${err instanceof ApiError ? err.code : 'unknown_error'}`, t('errors.unknown_error')))
     } finally {

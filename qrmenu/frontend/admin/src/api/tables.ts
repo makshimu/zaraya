@@ -51,11 +51,25 @@ export function useRegenerateToken() {
 
 /** Object URL of the table's QR PNG; the token is part of the key so a reissue refetches it. */
 export function useQrImage(table: Table) {
-  const { data: blob } = useQuery({
-    queryKey: ['qr', table.id, table.token],
-    queryFn: () => api.blob(`/tables/${table.id}/qr.png`),
+  return useBlobUrl(['qr', table.id, table.token], `/tables/${table.id}/qr.png`)
+}
+
+/** The menu link without a table, and whether phones can reach it at all. */
+export const useMenuLink = () =>
+  useQuery({
+    queryKey: ['menu-link'],
+    queryFn: () => api.get<{ url: string; local: boolean }>('/menu-link'),
     staleTime: Infinity,
   })
+
+export const useMenuQrImage = () => useBlobUrl(['menu-qr'], '/menu-link/qr.png')
+
+export async function downloadMenuQr(fmt: 'png' | 'svg') {
+  saveBlob(await api.blob(`/menu-link/qr.${fmt}`), `menu.${fmt}`)
+}
+
+function useBlobUrl(queryKey: unknown[], path: string) {
+  const { data: blob } = useQuery({ queryKey, queryFn: () => api.blob(path), staleTime: Infinity })
   const [url, setUrl] = useState<string>()
   useEffect(() => {
     if (!blob) return
