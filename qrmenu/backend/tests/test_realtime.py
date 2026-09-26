@@ -76,9 +76,9 @@ def test_staff_feed_gets_new_order_and_guest_gets_status(client):
                 f"{API}/orders/{placed['id']}/status", json={"status": "accepted"}, headers=auth
             )
             assert resp.status_code == 200
-            assert next_event(staff, "order.updated")["order"]["status"] == "accepted"
+            assert next_event(staff, "order.updated")["order"]["status"] == "cooking"
             update = next_event(guest, "order.updated")
-            assert update["order"]["status"] == "accepted"
+            assert update["order"]["status"] == "cooking"  # accepted = cooking
             assert "session_id" not in update["order"]  # guest view, no staff fields
 
 

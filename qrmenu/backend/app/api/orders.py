@@ -67,8 +67,9 @@ async def set_status(order_id: int, body: StatusIn, db: DB, user: CurrentUser) -
     order = await get_order_or_404(db, order_id)
     if body.status not in TRANSITIONS[order.status]:
         raise HTTPException(status.HTTP_409_CONFLICT, "invalid_transition")
-    audit(db, user, "status", "order", order.id, old=order.status.value, new=body.status.value)
-    order.status = body.status
+    new = OrderStatus.cooking if body.status == OrderStatus.accepted else body.status  # accept = start cooking
+    audit(db, user, "status", "order", order.id, old=order.status.value, new=new.value)
+    order.status = new
     order.updated_by_id = user.id
     await db.commit()
     db.expire_all()

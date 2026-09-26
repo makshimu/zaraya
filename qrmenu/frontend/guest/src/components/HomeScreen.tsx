@@ -4,7 +4,7 @@ import { tr } from '../../../shared/localized'
 import { formatMoney } from '../../../shared/money'
 import { LangContext, useT } from '../i18n'
 import { dishNames } from '../names'
-import type { DayHours, GuestItem, GuestMenu } from '../types'
+import type { DayHours, GuestItem, GuestMenu, GuestOrder } from '../types'
 import {
   ArrowRightIcon,
   ChevronRightIcon,
@@ -17,6 +17,7 @@ import {
 } from './icons'
 import Img from './Img'
 import LanguagePill from './LanguagePill'
+import StatusTrack, { orderStep } from './OrderStatus'
 import ServiceButtons from './ServiceButtons'
 
 /** What a guest sees right after scanning the QR: the restaurant, the menu entry, the waiter and bill
@@ -29,6 +30,8 @@ export default function HomeScreen({
   notify,
   onMenu,
   onItem,
+  orders,
+  onOrders,
 }: {
   menu: GuestMenu
   tableNumber: string | null
@@ -37,6 +40,8 @@ export default function HomeScreen({
   notify: (text: string) => void
   onMenu: () => void
   onItem: (id: number) => void
+  orders: GuestOrder[]
+  onOrders: () => void
 }) {
   const t = useT()
   const { lang } = useContext(LangContext)
@@ -113,6 +118,8 @@ export default function HomeScreen({
             <ArrowRightIcon className="size-5" />
           </span>
         </button>
+
+        <ActiveOrders orders={orders} onOpen={onOrders} />
 
         <ServiceButtons variant="cards" blockedReason={blockedReason} notify={notify} />
 
@@ -263,5 +270,54 @@ function InfoCard({ restaurant, notify }: { restaurant: GuestMenu['restaurant'];
         </div>
       )}
     </div>
+  )
+}
+
+const SERVED_VISIBLE_MS = 20 * 60_000
+
+/** The guest's orders still on their way, right on the home screen: waiting for the waiter,
+ * cooking, served. Updates live; tapping opens the full list. */
+function ActiveOrders({ orders, onOpen }: { orders: GuestOrder[]; onOpen: () => void }) {
+  const t = useT()
+  const { lang } = useContext(LangContext)
+  // Served orders stay a little while, then the card makes room; the full list is one tap away
+  const active = orders
+    .filter(
+      (o) =>
+        orderStep(o.status) !== null &&
+        (o.status !== 'served' || Date.now() - new Date(o.updated_at).getTime() < SERVED_VISIBLE_MS),
+    )
+    .slice(0, 3)
+  if (active.length === 0) return null
+  const time = (iso: string) => new Date(iso).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' })
+  const headline = (o: GuestOrder) =>
+    o.status === 'pending'
+      ? t('status.pending')
+      : o.status === 'served'
+        ? t('status.servedHome')
+        : t('status.cookingHome')
+
+  return (
+    <button
+      onClick={onOpen}
+      data-testid="active-orders"
+      className="block w-full space-y-4 rounded-3xl bg-paper p-4 text-left shadow-sm ring-1 ring-line"
+    >
+      <div className="flex items-center justify-between">
+        <span className="font-serif text-lg font-bold">{t(active.length > 1 ? 'yourOrders' : 'yourOrder')}</span>
+        <ChevronRightIcon className="size-5 text-muted" />
+      </div>
+      {active.map((o) => (
+        <div key={o.id} className="space-y-2" data-testid="active-order">
+          <div className="flex items-baseline justify-between gap-2 text-sm">
+            <span className="font-semibold">{headline(o)}</span>
+            <span className="shrink-0 text-muted">
+              {t('orderNo', { id: o.id })} · {time(o.created_at)}
+            </span>
+          </div>
+          <StatusTrack status={o.status} />
+        </div>
+      ))}
+    </button>
   )
 }

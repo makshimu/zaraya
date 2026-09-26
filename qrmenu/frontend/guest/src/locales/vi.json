@@ -83,5 +83,10 @@
   "popular": "Món phổ biến",
   "seeAll": "Xem tất cả",
   "back": "Quay lại",
-  "copied": "Đã sao chép mật khẩu"
+  "copied": "Đã sao chép mật khẩu",
+  "status.waiting": "Chờ xác nhận",
+  "status.cookingHome": "Món của bạn đang được chế biến",
+  "status.servedHome": "Đã phục vụ — chúc ngon miệng!",
+  "yourOrder": "Đơn của bạn",
+  "yourOrders": "Các đơn của bạn"
 }

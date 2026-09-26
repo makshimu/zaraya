@@ -78,9 +78,18 @@ test('order a dish with a topping → the order shows up in the staff panel with
   // the guest follows the status live
   await expect(guest.getByTestId('order-status').first()).toContainText('Ждёт подтверждения')
   await feed.getByRole('button', { name: 'Принять' }).click()
-  await expect(guest.locator('[data-status="accepted"]')).toBeVisible({
+  // one tap: accepted means cooking
+  await expect(guest.locator('[data-status="cooking"]')).toBeVisible({
     timeout: 3000,
   })
+
+  // the home screen shows it too
+  await guest.getByLabel('Закрыть').click()
+  await guest.getByTestId('back-home').click()
+  await expect(guest.getByTestId('active-orders')).toContainText('Ваш заказ готовится')
+  const [placed] = await guest.evaluate(() => fetch('/api/guest/orders').then((r) => r.json()))
+  await seed.call('post', `/orders/${placed.id}/status`, { status: 'served' })
+  await expect(guest.getByTestId('active-orders')).toContainText('Подано', { timeout: 3000 })
 })
 
 test('call the waiter → the table lights up in the hall; "Take" reaches the guest', async ({ browser, baseURL }) => {

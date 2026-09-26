@@ -3,10 +3,9 @@ import { useContext } from 'react'
 import { tr } from '../../../shared/localized'
 import { formatMoney } from '../../../shared/money'
 import { LangContext, useT } from '../i18n'
-import type { GuestOrder, OrderStatus } from '../types'
+import type { GuestOrder } from '../types'
+import StatusTrack from './OrderStatus'
 import Sheet from './Sheet'
-
-const STEPS: OrderStatus[] = ['accepted', 'cooking', 'served']
 
 /** The guest's orders of this visit with live status. */
 export default function OrdersSheet({
@@ -58,32 +57,5 @@ export default function OrdersSheet({
         ))}
       </div>
     </Sheet>
-  )
-}
-
-function StatusTrack({ status }: { status: OrderStatus }) {
-  const t = useT()
-  if (status === 'rejected' || status === 'pending' || status === 'closed') {
-    const tone = {
-      rejected: 'bg-red-50 text-red-700',
-      pending: 'bg-amber-50 text-amber-900',
-      closed: 'bg-cream text-muted',
-    }[status]
-    return (
-      <div data-testid="order-status" className={`rounded-xl px-3 py-2 text-sm font-medium ${tone}`}>
-        {t(`status.${status}`)}
-      </div>
-    )
-  }
-  const reached = STEPS.indexOf(status)
-  return (
-    <ol className="grid grid-cols-3 gap-1" data-testid="order-status" data-status={status}>
-      {STEPS.map((step, i) => (
-        <li key={step} className="text-center text-xs">
-          <div className={`mb-1 h-1.5 rounded-full ${i <= reached ? 'bg-jade' : 'bg-line'}`} />
-          <span className={i === reached ? 'font-semibold text-ink' : 'text-muted'}>{t(`status.${step}`)}</span>
-        </li>
-      ))}
-    </ol>
   )
 }

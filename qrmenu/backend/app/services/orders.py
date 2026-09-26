@@ -159,7 +159,7 @@ async def create_order(
         table_id=session.table_id,
         session_id=session.id,
         idempotency_key=idempotency_key,
-        status=OrderStatus.pending if needs_confirmation else OrderStatus.accepted,
+        status=OrderStatus.pending if needs_confirmation else OrderStatus.cooking,
         comment=body.comment.strip(),
         # Only languages the restaurant offers; anything else counts as the default one
         language=body.language if body.language in settings.languages else settings.default_language,

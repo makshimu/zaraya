@@ -83,5 +83,10 @@
   "popular": "人気の料理",
   "seeAll": "すべて見る",
   "back": "戻る",
-  "copied": "パスワードをコピーしました"
+  "copied": "パスワードをコピーしました",
+  "status.waiting": "確認待ち",
+  "status.cookingHome": "ご注文を調理中です",
+  "status.servedHome": "お届けしました。どうぞお召し上がりください！",
+  "yourOrder": "ご注文",
+  "yourOrders": "ご注文"
 }

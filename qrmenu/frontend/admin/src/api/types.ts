@@ -157,13 +157,13 @@ export type OrderStatus = 'pending' | 'accepted' | 'cooking' | 'served' | 'close
 
 export const ORDER_STATUSES: OrderStatus[] = ['pending', 'accepted', 'cooking', 'served', 'closed', 'rejected']
 export const ACTIVE_STATUSES: OrderStatus[] = ['pending', 'accepted', 'cooking', 'served']
-export const EDITABLE_STATUSES: OrderStatus[] = ['pending', 'accepted']
+export const EDITABLE_STATUSES: OrderStatus[] = ['pending', 'accepted', 'cooking']
 
-// Mirrors the backend's allowed transitions
+// Mirrors the backend's allowed transitions. "Accept" starts cooking right away (one tap).
 export const NEXT_STATUSES: Record<OrderStatus, OrderStatus[]> = {
   pending: ['accepted', 'rejected'],
   accepted: ['cooking', 'served', 'rejected'],
-  cooking: ['served'],
+  cooking: ['served', 'rejected'],
   served: ['closed'],
   closed: [],
   rejected: [],

@@ -83,5 +83,10 @@
   "popular": "인기 메뉴",
   "seeAll": "전체 보기",
   "back": "뒤로",
-  "copied": "비밀번호가 복사되었습니다"
+  "copied": "비밀번호가 복사되었습니다",
+  "status.waiting": "확인 대기",
+  "status.cookingHome": "주문하신 음식을 조리 중입니다",
+  "status.servedHome": "서빙 완료 — 맛있게 드세요!",
+  "yourOrder": "내 주문",
+  "yourOrders": "내 주문"
 }

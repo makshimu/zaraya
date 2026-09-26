@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import { tr } from '../../shared/localized'
 import { GUEST_SOURCE, isPreviewCommand, type RestaurantDraft } from '../../shared/preview'
@@ -93,19 +93,36 @@ type View = 'home' | 'menu'
 /** Home and menu are two screens of one page: the menu gets its own history entry, so the phone's
  * Back button returns to the home screen. */
 function useView(): [View, (v: View) => void] {
-  const [view, setViewState] = useState<View>(() =>
-    history.state?.view === 'menu' || (isPreview && previewView === 'menu') ? 'menu' : 'home',
-  )
+  const viewOf = (state: { view?: string } | null): View =>
+    state?.view === 'menu' || (isPreview && previewView === 'menu') ? 'menu' : 'home'
+  const [view, setViewState] = useState<View>(() => viewOf(history.state))
+  // "Back to home" pressed while a just-closed sheet still has its own history entry to unwind:
+  // keep stepping back until the entry before the menu
+  const goingHome = useRef(false)
   useEffect(() => {
-    const onPop = () =>
-      setViewState(history.state?.view === 'menu' || (isPreview && previewView === 'menu') ? 'menu' : 'home')
+    const onPop = () => {
+      const next = viewOf(history.state)
+      if (goingHome.current) {
+        if (next === 'menu') {
+          history.back()
+          return
+        }
+        goingHome.current = false
+      }
+      setViewState(next)
+    }
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
   const setView = useCallback((v: View) => {
-    if (v === 'menu' && history.state?.view !== 'menu') history.pushState({ view: 'menu' }, '')
-    if (v === 'home' && history.state?.view === 'menu') history.back()
-    else setViewState(v)
+    if (v === 'menu') {
+      if (history.state?.view !== 'menu') history.pushState({ view: 'menu' }, '')
+    } else if (history.state?.view === 'menu') {
+      goingHome.current = true
+      // a closing sheet steps back on its own; otherwise step back from the menu entry now
+      if (!history.state?.sheet) history.back()
+    }
+    setViewState(v)
   }, [])
   return [view, setView]
 }
@@ -201,6 +218,8 @@ function GuestScreen({ menu: loaded }: { menu: GuestMenu }) {
             setView('menu')
             setOpenItemId(id)
           }}
+          orders={orders.data ?? []}
+          onOrders={() => setPanel('orders')}
         />
       ) : (
         <div className="pb-44">

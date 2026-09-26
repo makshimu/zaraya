@@ -83,5 +83,10 @@
   "popular": "热门菜品",
   "seeAll": "查看全部",
   "back": "返回",
-  "copied": "密码已复制"
+  "copied": "密码已复制",
+  "status.waiting": "等待确认",
+  "status.cookingHome": "您的订单正在制作中",
+  "status.servedHome": "已上菜 — 请慢用！",
+  "yourOrder": "您的订单",
+  "yourOrders": "您的订单"
 }

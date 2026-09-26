@@ -83,5 +83,10 @@
   "popular": "Popular dishes",
   "seeAll": "See all",
   "back": "Back",
-  "copied": "Password copied"
+  "copied": "Password copied",
+  "status.waiting": "Waiting",
+  "status.cookingHome": "Your order is being prepared",
+  "status.servedHome": "Served — enjoy your meal!",
+  "yourOrder": "Your order",
+  "yourOrders": "Your orders"
 }

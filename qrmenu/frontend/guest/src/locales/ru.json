@@ -83,5 +83,10 @@
   "popular": "Популярные блюда",
   "seeAll": "Все",
   "back": "Назад",
-  "copied": "Пароль скопирован"
+  "copied": "Пароль скопирован",
+  "status.waiting": "Ждёт подтверждения",
+  "status.cookingHome": "Ваш заказ готовится",
+  "status.servedHome": "Подано — приятного аппетита!",
+  "yourOrder": "Ваш заказ",
+  "yourOrders": "Ваши заказы"
 }

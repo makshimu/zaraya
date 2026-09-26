@@ -66,7 +66,7 @@ async def test_backend_prices_the_order(admin_client, guest_client):
     assert resp.status_code == 201, resp.text
     data = resp.json()
     assert data["table_number"] == "5"
-    assert data["status"] == "accepted"
+    assert data["status"] == "cooking"  # no confirmation needed: straight to the kitchen
     assert data["comment"] == "побыстрее"
     first, second = data["items"]
     assert first["unit_price"] == 95000 + 15000 + 20000
@@ -110,7 +110,7 @@ async def test_first_order_needs_confirmation(admin_client, guest_client):
     first = (await order(guest_client, line(item))).json()
     second = (await order(guest_client, line(item))).json()
     assert first["status"] == "pending"
-    assert second["status"] == "accepted"
+    assert second["status"] == "cooking"
 
 
 async def test_rejected_first_order_keeps_next_one_pending(admin_client, guest_client):
@@ -241,10 +241,11 @@ async def test_status_flow(admin_client, waiter_client, guest_client):
     placed = (await order(guest_client, line(item))).json()
     url = f"{API}/orders/{placed['id']}/status"
 
-    for new in ("accepted", "cooking", "served", "closed"):
+    # "Accept" puts the order straight into cooking
+    for new, stored in (("accepted", "cooking"), ("served", "served"), ("closed", "closed")):
         resp = await waiter_client.post(url, json={"status": new})
         assert resp.status_code == 200, resp.text
-        assert resp.json()["status"] == new
+        assert resp.json()["status"] == stored
         assert resp.json()["updated_by"] == "Waiter"
 
     back = await waiter_client.post(url, json={"status": "cooking"})
@@ -263,10 +264,10 @@ async def test_skip_kitchen_and_reject(admin_client, guest_client):
     served = await admin_client.post(f"{API}/orders/{a['id']}/status", json={"status": "served"})
     assert served.json()["status"] == "served"
     rejected = await admin_client.post(f"{API}/orders/{b['id']}/status", json={"status": "rejected"})
-    assert rejected.json()["status"] == "rejected"
+    assert rejected.json()["status"] == "rejected"  # declined while cooking: out of stock
 
 
-async def test_edit_items_before_cooking(admin_client, guest_client):
+async def test_edit_items_until_served(admin_client, guest_client):
     _, item, group = await seed(admin_client, guest_client)
     placed = (await order(guest_client, line(item, qty=2), line(item, group, mods=(0,)))).json()
     keep, drop = placed["items"]
@@ -281,7 +282,7 @@ async def test_edit_items_before_cooking(admin_client, guest_client):
     bogus = await admin_client.put(url, json={"items": [{"id": drop["id"], "quantity": 1}]})
     assert bogus.status_code == 422
 
-    await admin_client.post(f"{API}/orders/{placed['id']}/status", json={"status": "cooking"})
+    await admin_client.post(f"{API}/orders/{placed['id']}/status", json={"status": "served"})
     late = await admin_client.put(url, json={"items": [{"id": keep["id"], "quantity": 1}]})
     assert late.status_code == 409
     assert late.json()["detail"] == "order_not_editable"
@@ -299,7 +300,7 @@ async def test_list_filters(admin_client, guest_client):
     assert ids(await admin_client.get(f"{API}/orders")) == [b["id"], a["id"]]  # newest first
     assert ids(await admin_client.get(f"{API}/orders", params={"status": "served"})) == [a["id"]]
     assert ids(
-        await admin_client.get(f"{API}/orders", params=[("status", "served"), ("status", "accepted")])
+        await admin_client.get(f"{API}/orders", params=[("status", "served"), ("status", "cooking")])
     ) == [b["id"], a["id"]]
     assert ids(await admin_client.get(f"{API}/orders", params={"table_id": other_table["id"]})) == [b["id"]]
 

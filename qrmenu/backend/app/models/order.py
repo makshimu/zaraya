@@ -13,25 +13,27 @@ from app.models.user import User
 
 class OrderStatus(str, enum.Enum):
     pending = "pending"  # waits for a waiter to accept (first order of a session)
-    accepted = "accepted"
+    accepted = "accepted"  # older orders only: accepting now starts cooking right away
     cooking = "cooking"
     served = "served"
     closed = "closed"
     rejected = "rejected"
 
 
-# Allowed staff transitions. "accepted -> served" covers drinks that skip the kitchen.
+# Allowed staff transitions. "Accept" (pending -> accepted) is stored as cooking: one tap
+# instead of two. "cooking -> served" also covers drinks; a dish can still be declined while
+# it cooks (out of stock).
 TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
-    OrderStatus.pending: {OrderStatus.accepted, OrderStatus.rejected},
+    OrderStatus.pending: {OrderStatus.accepted, OrderStatus.cooking, OrderStatus.rejected},
     OrderStatus.accepted: {OrderStatus.cooking, OrderStatus.served, OrderStatus.rejected},
-    OrderStatus.cooking: {OrderStatus.served},
+    OrderStatus.cooking: {OrderStatus.served, OrderStatus.rejected},
     OrderStatus.served: {OrderStatus.closed},
     OrderStatus.closed: set(),
     OrderStatus.rejected: set(),
 }
 
-# Positions can be edited until the kitchen starts
-EDITABLE_STATUSES = {OrderStatus.pending, OrderStatus.accepted}
+# Positions can be corrected until the order is served
+EDITABLE_STATUSES = {OrderStatus.pending, OrderStatus.accepted, OrderStatus.cooking}
 ACTIVE_STATUSES = {OrderStatus.pending, OrderStatus.accepted, OrderStatus.cooking, OrderStatus.served}
 
 
