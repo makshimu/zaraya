@@ -16,6 +16,7 @@ router = APIRouter(
 def settings_out(s: RestaurantSettings) -> RestaurantSettingsOut:
     out = RestaurantSettingsOut.model_validate(s)
     out.logo_urls = media.image_urls(s.logo)
+    out.cover_urls = media.image_urls(s.cover)
     out.telegram_token_set = bool(s.telegram_bot_token)
     return out
 
@@ -30,8 +31,10 @@ async def update_settings(body: RestaurantSettingsIn, db: DB, user: AdminUser) -
     settings = await db.get_one(RestaurantSettings, 1)
     if body.logo is not None and body.logo != settings.logo and not media.is_valid_key(body.logo):
         raise HTTPException(422, "image_not_found")
-    old_logo = settings.logo
-    changes = body.model_dump(exclude={"telegram_bot_token"})
+    if body.cover is not None and body.cover != settings.cover and not media.is_valid_key(body.cover):
+        raise HTTPException(422, "image_not_found")
+    old_logo, old_cover = settings.logo, settings.cover
+    changes = body.model_dump(mode="json", exclude={"telegram_bot_token"})
     for key, value in changes.items():
         setattr(settings, key, value)
     if body.telegram_bot_token is not None:
@@ -43,6 +46,8 @@ async def update_settings(body: RestaurantSettingsIn, db: DB, user: AdminUser) -
     await db.commit()
     if old_logo != settings.logo:
         media.delete_image(old_logo)
+    if old_cover != settings.cover:
+        media.delete_image(old_cover)
     return settings_out(settings)
 
 

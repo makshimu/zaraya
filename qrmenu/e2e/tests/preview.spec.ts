@@ -1,7 +1,7 @@
 /** The live phone preview on the admin menu page: fully clickable, but it never sends anything. */
 import { expect, test } from '@playwright/test'
 
-import { adminPage, closeContexts, Seed } from './helpers'
+import { adminPage, closeContexts, openMenu, Seed } from './helpers'
 
 let seed: Seed
 let data: Awaited<ReturnType<Seed['menuAndTable']>>
@@ -70,5 +70,6 @@ test('the preview follows menu edits live and switches language', async ({ brows
   await expect(preview.getByText(`Латте ${seed.tag}`)).toBeVisible({ timeout: 3000 })
 
   await staff.getByLabel('Язык превью').selectOption('en')
+  await openMenu(preview)
   await expect(preview.getByText(`Latte ${seed.tag}`)).toBeVisible()
 })

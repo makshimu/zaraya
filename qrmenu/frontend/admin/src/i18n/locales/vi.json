@@ -180,7 +180,29 @@
     "telegramTest": "Gửi tin nhắn thử",
     "telegramSaveFirst": "Hãy lưu token và ID nhóm trước",
     "telegramTestOk": "Đã gửi — hãy kiểm tra nhóm chat",
-    "telegramTestFailed": "Telegram báo lỗi: {{error}}"
+    "telegramTestFailed": "Telegram báo lỗi: {{error}}",
+    "guestHome": "Màn hình chính của khách",
+    "guestHomeHint": "Khách thấy màn hình này ngay sau khi quét mã QR: tên, khẩu hiệu, ảnh nền, Wi‑Fi và giờ mở cửa.",
+    "tagline": "Khẩu hiệu",
+    "cover": "Ảnh nền",
+    "coverHint": "Ảnh ngang của không gian quán hoặc món ăn; tên nhà hàng sẽ hiển thị phía trên.",
+    "wifiName": "Tên mạng Wi‑Fi",
+    "wifiPassword": "Mật khẩu Wi‑Fi",
+    "wifiHint": "Để trống tên mạng nếu không muốn hiển thị Wi‑Fi cho khách.",
+    "showHours": "Hiển thị giờ mở cửa",
+    "opens": "mở cửa",
+    "closes": "đóng cửa",
+    "dayOff": "Nghỉ",
+    "sameEveryDay": "Áp dụng giờ thứ Hai cho mọi ngày",
+    "weekday": {
+      "mon": "Thứ Hai",
+      "tue": "Thứ Ba",
+      "wed": "Thứ Tư",
+      "thu": "Thứ Năm",
+      "fri": "Thứ Sáu",
+      "sat": "Thứ Bảy",
+      "sun": "Chủ Nhật"
+    }
   },
   "realtime": {
     "online": "Trực tuyến",

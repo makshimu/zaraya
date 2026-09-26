@@ -4,6 +4,7 @@ import { tr } from '../../../shared/localized'
 import { formatMoney } from '../../../shared/money'
 import { useCart } from '../cart'
 import { LangContext, useT } from '../i18n'
+import { dishNames } from '../names'
 import { groupSatisfied, initialSelection, toggleModifier, unitPrice } from '../selection'
 import type { GuestItem, GuestModifierGroup } from '../types'
 import { MinusIcon, PlusIcon } from './icons'
@@ -32,6 +33,7 @@ export default function ItemSheet({
   const cart = useCart()
   const money = (amount: number) => formatMoney(amount, currency, lang)
 
+  const { primary, secondary } = dishNames(item.name, lang, fallbackLang)
   const total = unitPrice(item, groups, sel) * sel.quantity
   const canAdd = item.is_available && groups.every((g) => groupSatisfied(sel, g))
 
@@ -58,7 +60,7 @@ export default function ItemSheet({
         <button
           onClick={addToCart}
           disabled={!canAdd}
-          className="flex w-full items-center justify-between rounded-2xl bg-blue-600 px-5 py-4 text-lg font-semibold text-white disabled:bg-slate-300"
+          className="flex w-full items-center justify-between rounded-2xl bg-wine px-5 py-4 text-lg font-semibold text-white disabled:bg-muted/40"
         >
           <span>{item.is_available ? t('addToCart') : t('outOfStock')}</span>
           <span data-testid="total">{money(total)}</span>
@@ -68,17 +70,18 @@ export default function ItemSheet({
       {item.image_urls && <Img src={item.image_urls.w1200} eager className="aspect-[4/3] w-full" />}
       <div className="space-y-5 p-5">
         <div>
-          <h2 className="text-2xl font-bold">{l(item.name)}</h2>
+          <h2 className="font-serif text-2xl font-bold">{primary}</h2>
+          {secondary && <p className="text-muted">{secondary}</p>}
           {item.badges.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {item.badges.map((b) => (
-                <span key={b} className="rounded-full bg-orange-50 px-2 py-0.5 text-xs text-orange-700">
+                <span key={b} className="rounded-full bg-wine-soft px-2 py-0.5 text-xs font-medium text-wine">
                   {t(`badge.${b}`)}
                 </span>
               ))}
             </div>
           )}
-          {l(item.description) && <p className="mt-2 text-slate-600">{l(item.description)}</p>}
+          {l(item.description) && <p className="mt-2 text-muted">{l(item.description)}</p>}
           {!item.is_available && <p className="mt-2 font-medium text-amber-700">{t('outOfStock')}</p>}
         </div>
 
@@ -87,12 +90,12 @@ export default function ItemSheet({
             {item.prices.map((p) => (
               <label
                 key={p.id}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 has-checked:border-blue-500 has-checked:bg-blue-50"
+                className="flex items-center gap-3 rounded-xl border border-line px-4 py-3 has-checked:border-wine has-checked:bg-wine-soft"
               >
                 <input
                   type="radio"
                   name="variant"
-                  className="size-4 accent-blue-600"
+                  className="size-4 accent-wine"
                   checked={sel.priceId === p.id}
                   onChange={() => setSel({ ...sel, priceId: p.id })}
                 />
@@ -107,7 +110,7 @@ export default function ItemSheet({
           <fieldset key={g.id} className="space-y-2">
             <legend className="mb-2 flex w-full items-baseline justify-between">
               <span className="font-semibold">{l(g.name)}</span>
-              <span className={`text-xs ${groupSatisfied(sel, g) ? 'text-slate-500' : 'text-red-600'}`}>
+              <span className={`text-xs ${groupSatisfied(sel, g) ? 'text-muted' : 'text-red-600'}`}>
                 {groupHint(g)}
               </span>
             </legend>
@@ -116,12 +119,12 @@ export default function ItemSheet({
               return (
                 <label
                   key={m.id}
-                  className={`flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 has-checked:border-blue-500 has-checked:bg-blue-50 ${m.is_available ? '' : 'opacity-50'}`}
+                  className={`flex items-center gap-3 rounded-xl border border-line px-4 py-3 has-checked:border-wine has-checked:bg-wine-soft ${m.is_available ? '' : 'opacity-50'}`}
                 >
                   <input
                     type={g.max_select === 1 ? 'radio' : 'checkbox'}
                     name={`group-${g.id}`}
-                    className="size-4 accent-blue-600"
+                    className="size-4 accent-wine"
                     disabled={!m.is_available}
                     checked={checked}
                     onClick={() => setSel(toggleModifier(sel, g, m.id))}
@@ -129,9 +132,9 @@ export default function ItemSheet({
                   />
                   <span className="flex-1">
                     {l(m.name)}
-                    {!m.is_available && <span className="ml-2 text-xs text-slate-500">{t('outOfStock')}</span>}
+                    {!m.is_available && <span className="ml-2 text-xs text-muted">{t('outOfStock')}</span>}
                   </span>
-                  {m.price > 0 && <span className="text-slate-600">+{money(m.price)}</span>}
+                  {m.price > 0 && <span className="text-muted">+{money(m.price)}</span>}
                 </label>
               )
             })}
@@ -147,7 +150,7 @@ export default function ItemSheet({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder={t('commentPlaceholder')}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-base outline-none focus:border-blue-500"
+              className="w-full rounded-xl border border-line px-4 py-3 text-base outline-none focus:border-wine"
             />
           </label>
         )}
@@ -159,7 +162,7 @@ export default function ItemSheet({
               aria-label={t('decrease')}
               disabled={sel.quantity <= 1}
               onClick={() => setSel({ ...sel, quantity: sel.quantity - 1 })}
-              className="flex size-10 items-center justify-center rounded-full border border-slate-200 disabled:opacity-30"
+              className="flex size-10 items-center justify-center rounded-full border border-line disabled:opacity-30"
             >
               <MinusIcon className="size-5" />
             </button>
@@ -169,7 +172,7 @@ export default function ItemSheet({
             <button
               aria-label={t('increase')}
               onClick={() => setSel({ ...sel, quantity: Math.min(99, sel.quantity + 1) })}
-              className="flex size-10 items-center justify-center rounded-full border border-slate-200"
+              className="flex size-10 items-center justify-center rounded-full border border-line"
             >
               <PlusIcon className="size-5" />
             </button>

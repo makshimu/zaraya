@@ -50,7 +50,7 @@ export default function CategoryStrip({
           data-cat={c.id}
           onClick={(e) => jump(e, c.id)}
           className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
-            active === c.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
+            active === c.id ? 'bg-wine text-white shadow-sm' : 'border border-line bg-paper text-ink'
           }`}
         >
           {tr(c.name, lang, fallbackLang)}

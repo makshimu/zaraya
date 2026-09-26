@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import { ApiError } from '../api/client'
 import { testTelegram, useSaveSettings, useSettings, type SettingsInput } from '../api/settings'
-import type { RestaurantSettings } from '../api/types'
+import type { DayHours, RestaurantSettings } from '../api/types'
 import ImagePicker from '../components/ImagePicker'
 import LocalizedField from '../components/LocalizedField'
 import { btn, input, label } from '../components/ui'
@@ -25,9 +25,10 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
   const { t } = useTranslation()
   const errorText = useErrorText()
   const save = useSaveSettings()
-  const { logo_urls, telegram_token_set, ...rest } = initial
+  const { logo_urls, cover_urls, telegram_token_set, ...rest } = initial
   const [form, setForm] = useState<SettingsInput>(rest)
   const [logoUrl, setLogoUrl] = useState(logo_urls?.w400 ?? null)
+  const [coverUrl, setCoverUrl] = useState(cover_urls?.w400 ?? null)
   const [newLang, setNewLang] = useState('')
   const [saved, setSaved] = useState(false)
 
@@ -160,6 +161,8 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
         </div>
       </section>
 
+      <GuestHomeSection form={form} set={set} coverUrl={coverUrl} setCoverUrl={setCoverUrl} />
+
       <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="font-semibold">{t('settings.sessions')}</h2>
         <div>
@@ -218,6 +221,140 @@ function SettingsForm({ initial }: { initial: RestaurantSettings }) {
         </button>
       </div>
     </form>
+  )
+}
+
+const DEFAULT_HOURS: DayHours = { open: '11:00', close: '23:00', closed: false }
+const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+/** What guests see right after scanning the QR: tagline, cover photo, Wi-Fi and opening hours. */
+function GuestHomeSection({
+  form,
+  set,
+  coverUrl,
+  setCoverUrl,
+}: {
+  form: SettingsInput
+  set: (patch: Partial<SettingsInput>) => void
+  coverUrl: string | null
+  setCoverUrl: (url: string | null) => void
+}) {
+  const { t } = useTranslation()
+  const hours = form.opening_hours
+  const setDay = (index: number, patch: Partial<DayHours>) =>
+    set({ opening_hours: hours!.map((d, i) => (i === index ? { ...d, ...patch } : d)) })
+
+  return (
+    <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5" data-testid="guest-home-settings">
+      <div>
+        <h2 className="font-semibold">{t('settings.guestHome')}</h2>
+        <p className="text-sm text-slate-500">{t('settings.guestHomeHint')}</p>
+      </div>
+      <LocalizedField
+        id="rest-tagline"
+        label={t('settings.tagline')}
+        value={form.tagline}
+        onChange={(tagline) => set({ tagline })}
+        languages={form.languages}
+      />
+      <div>
+        <span className={label}>{t('settings.cover')}</span>
+        <ImagePicker
+          value={{ key: form.cover, url: coverUrl }}
+          onChange={({ key, url }) => {
+            set({ cover: key })
+            setCoverUrl(url)
+          }}
+        />
+        <p className="mt-1 text-sm text-slate-500">{t('settings.coverHint')}</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <label className={label} htmlFor="wifi-name">
+            {t('settings.wifiName')}
+          </label>
+          <input
+            id="wifi-name"
+            className={input}
+            maxLength={64}
+            placeholder="MyCafe_Guest"
+            value={form.wifi_name ?? ''}
+            onChange={(e) => set({ wifi_name: e.target.value || null })}
+          />
+        </div>
+        <div>
+          <label className={label} htmlFor="wifi-password">
+            {t('settings.wifiPassword')}
+          </label>
+          <input
+            id="wifi-password"
+            className={input}
+            maxLength={64}
+            autoComplete="off"
+            value={form.wifi_password ?? ''}
+            onChange={(e) => set({ wifi_password: e.target.value || null })}
+          />
+        </div>
+      </div>
+      <p className="-mt-2 text-sm text-slate-500">{t('settings.wifiHint')}</p>
+
+      <div className="space-y-3">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={!!hours}
+            onChange={(e) =>
+              set({ opening_hours: e.target.checked ? WEEKDAYS.map(() => ({ ...DEFAULT_HOURS })) : null })
+            }
+          />
+          {t('settings.showHours')}
+        </label>
+        {hours && (
+          <div className="space-y-2" data-testid="opening-hours">
+            {hours.map((day, i) => (
+              <div key={WEEKDAYS[i]} className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="w-28 font-medium">{t(`settings.weekday.${WEEKDAYS[i]}`)}</span>
+                <input
+                  type="time"
+                  aria-label={`${t(`settings.weekday.${WEEKDAYS[i]}`)} ${t('settings.opens')}`}
+                  className={input.replace('w-full', 'w-32')}
+                  disabled={day.closed}
+                  required
+                  value={day.open.slice(0, 5)}
+                  onChange={(e) => setDay(i, { open: e.target.value })}
+                />
+                <span className="text-slate-400">–</span>
+                <input
+                  type="time"
+                  aria-label={`${t(`settings.weekday.${WEEKDAYS[i]}`)} ${t('settings.closes')}`}
+                  className={input.replace('w-full', 'w-32')}
+                  disabled={day.closed}
+                  required
+                  value={day.close.slice(0, 5)}
+                  onChange={(e) => setDay(i, { close: e.target.value })}
+                />
+                <label className="flex items-center gap-1.5 pl-2">
+                  <input
+                    type="checkbox"
+                    checked={day.closed}
+                    onChange={(e) => setDay(i, { closed: e.target.checked })}
+                  />
+                  {t('settings.dayOff')}
+                </label>
+              </div>
+            ))}
+            <button
+              type="button"
+              className={btn.secondary}
+              onClick={() => set({ opening_hours: hours.map(() => ({ ...hours[0] })) })}
+            >
+              {t('settings.sameEveryDay')}
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
   )
 }
 

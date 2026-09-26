@@ -28,12 +28,12 @@ export default function OrdersSheet({
   return (
     <Sheet label={t('myOrders')} title={t('myOrders')} onClose={onClose}>
       <div className="space-y-4 p-5">
-        {orders.length === 0 && <p className="py-6 text-center text-slate-500">{t('noOrders')}</p>}
+        {orders.length === 0 && <p className="py-6 text-center text-muted">{t('noOrders')}</p>}
         {orders.map((order) => (
-          <article key={order.id} data-testid="order" className="rounded-2xl border border-slate-200 p-4">
+          <article key={order.id} data-testid="order" className="rounded-2xl border border-line p-4">
             <div className="mb-3 flex items-baseline justify-between">
               <span className="font-semibold">{t('orderNo', { id: order.id })}</span>
-              <span className="text-sm text-slate-500">{time(order.created_at)}</span>
+              <span className="text-sm text-muted">{time(order.created_at)}</span>
             </div>
             <StatusTrack status={order.status} />
             <ul className="mt-3 space-y-1 text-sm">
@@ -43,14 +43,14 @@ export default function OrdersSheet({
                     {line.quantity} × {l(line.name)}
                     {l(line.price_name) && `, ${l(line.price_name)}`}
                     {line.modifiers.length > 0 && (
-                      <span className="text-slate-500"> + {line.modifiers.map((m) => l(m.name)).join(', ')}</span>
+                      <span className="text-muted"> + {line.modifiers.map((m) => l(m.name)).join(', ')}</span>
                     )}
                   </span>
                   <span className="shrink-0">{formatMoney(line.total, currency, lang)}</span>
                 </li>
               ))}
             </ul>
-            <div className="mt-3 flex justify-between border-t border-slate-100 pt-3 font-semibold">
+            <div className="mt-3 flex justify-between border-t border-line pt-3 font-semibold">
               <span>{t('total')}</span>
               <span>{formatMoney(order.total, currency, lang)}</span>
             </div>
@@ -67,7 +67,7 @@ function StatusTrack({ status }: { status: OrderStatus }) {
     const tone = {
       rejected: 'bg-red-50 text-red-700',
       pending: 'bg-amber-50 text-amber-900',
-      closed: 'bg-slate-100 text-slate-600',
+      closed: 'bg-cream text-muted',
     }[status]
     return (
       <div data-testid="order-status" className={`rounded-xl px-3 py-2 text-sm font-medium ${tone}`}>
@@ -80,10 +80,8 @@ function StatusTrack({ status }: { status: OrderStatus }) {
     <ol className="grid grid-cols-3 gap-1" data-testid="order-status" data-status={status}>
       {STEPS.map((step, i) => (
         <li key={step} className="text-center text-xs">
-          <div className={`mb-1 h-1.5 rounded-full ${i <= reached ? 'bg-green-500' : 'bg-slate-200'}`} />
-          <span className={i === reached ? 'font-semibold text-slate-900' : 'text-slate-400'}>
-            {t(`status.${step}`)}
-          </span>
+          <div className={`mb-1 h-1.5 rounded-full ${i <= reached ? 'bg-jade' : 'bg-line'}`} />
+          <span className={i === reached ? 'font-semibold text-ink' : 'text-muted'}>{t(`status.${step}`)}</span>
         </li>
       ))}
     </ol>

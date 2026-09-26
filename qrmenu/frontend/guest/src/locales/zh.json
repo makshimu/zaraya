@@ -66,5 +66,22 @@
   "pay.card": "刷卡",
   "pay.qr": "二维码转账",
   "tableNotOpen": "请让服务员开台，之后即可点餐",
-  "previewNotice": "这是预览——订单和呼叫不会被发送"
+  "previewNotice": "这是预览——订单和呼叫不会被发送",
+  "menuTitle": "菜单",
+  "menuSub": "浏览我们的菜品",
+  "callStaff": "呼叫服务员",
+  "callStaffSub": "请服务员过来",
+  "getBill": "结账",
+  "getBillSub": "快捷方便",
+  "wifi": "Wi-Fi",
+  "wifiPassword": "密码",
+  "noPassword": "无需密码",
+  "hours": "营业时间",
+  "everyDay": "每天",
+  "today": "今天",
+  "closedToday": "今日休息",
+  "popular": "热门菜品",
+  "seeAll": "查看全部",
+  "back": "返回",
+  "copied": "密码已复制"
 }

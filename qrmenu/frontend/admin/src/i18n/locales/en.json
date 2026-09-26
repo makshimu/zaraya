@@ -181,7 +181,29 @@
     "telegramTest": "Send a test message",
     "telegramSaveFirst": "Save the token and chat first",
     "telegramTestOk": "Sent — check the chat",
-    "telegramTestFailed": "Telegram returned an error: {{error}}"
+    "telegramTestFailed": "Telegram returned an error: {{error}}",
+    "guestHome": "Guest home screen",
+    "guestHomeHint": "Guests see it right after scanning the QR code: name, tagline, background, Wi‑Fi and opening hours.",
+    "tagline": "Tagline",
+    "cover": "Background photo",
+    "coverHint": "A landscape photo of the room or dishes; the restaurant name goes on top of it.",
+    "wifiName": "Wi‑Fi network name",
+    "wifiPassword": "Wi‑Fi password",
+    "wifiHint": "Leave the network name empty to hide Wi‑Fi from guests.",
+    "showHours": "Show opening hours",
+    "opens": "opens",
+    "closes": "closes",
+    "dayOff": "Closed",
+    "sameEveryDay": "Copy Monday to every day",
+    "weekday": {
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday",
+      "sat": "Saturday",
+      "sun": "Sunday"
+    }
   },
   "realtime": {
     "online": "Online",

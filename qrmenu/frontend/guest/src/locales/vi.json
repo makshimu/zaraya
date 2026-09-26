@@ -66,5 +66,22 @@
   "pay.card": "Thẻ",
   "pay.qr": "Chuyển khoản QR",
   "tableNotOpen": "Vui lòng nhờ nhân viên mở bàn — sau đó bạn có thể gọi món",
-  "previewNotice": "Đây là bản xem trước — đơn và yêu cầu không được gửi đi"
+  "previewNotice": "Đây là bản xem trước — đơn và yêu cầu không được gửi đi",
+  "menuTitle": "Thực đơn",
+  "menuSub": "Khám phá các món ăn",
+  "callStaff": "Gọi nhân viên",
+  "callStaffSub": "Yêu cầu phục vụ",
+  "getBill": "Thanh toán",
+  "getBillSub": "Nhanh chóng, tiện lợi",
+  "wifi": "Wi-Fi",
+  "wifiPassword": "Mật khẩu",
+  "noPassword": "Không cần mật khẩu",
+  "hours": "Giờ mở cửa",
+  "everyDay": "Mỗi ngày",
+  "today": "Hôm nay",
+  "closedToday": "Hôm nay nghỉ",
+  "popular": "Món phổ biến",
+  "seeAll": "Xem tất cả",
+  "back": "Quay lại",
+  "copied": "Đã sao chép mật khẩu"
 }

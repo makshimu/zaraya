@@ -11,7 +11,7 @@ export default function Toast({ text, onDone }: { text: string; onDone: () => vo
     <div
       role="status"
       aria-live="polite"
-      className="fixed inset-x-0 top-3 z-[60] mx-auto w-fit max-w-[90vw] rounded-2xl bg-slate-900 px-5 py-3 text-center text-sm font-medium text-white shadow-lg"
+      className="fixed inset-x-0 top-3 z-[60] mx-auto w-fit max-w-[90vw] rounded-2xl bg-ink px-5 py-3 text-center text-sm font-medium text-white shadow-lg"
     >
       {text}
     </div>

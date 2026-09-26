@@ -30,7 +30,7 @@ export default function Sheet({
     // Leaving the sheet's history entry means the Back button was pressed
     const onPop = () => !history.state?.sheet && onClose()
     window.addEventListener('popstate', onPop)
-    if (openSheets++ === 0) history.pushState({ sheet: true }, '')
+    if (openSheets++ === 0) history.pushState({ ...history.state, sheet: true }, '')
     return () => {
       document.body.style.overflow = prev
       window.removeEventListener('keydown', onKey)
@@ -49,16 +49,16 @@ export default function Sheet({
       <div
         role="dialog"
         aria-label={label}
-        className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white"
+        className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-paper"
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
             <h2 className="text-xl font-bold">{title}</h2>
             <button
               onClick={onClose}
               aria-label={t('close')}
-              className="flex size-9 items-center justify-center rounded-full bg-slate-100"
+              className="flex size-9 items-center justify-center rounded-full bg-cream"
             >
               <XIcon className="size-5" />
             </button>
@@ -68,15 +68,13 @@ export default function Sheet({
           <button
             onClick={onClose}
             aria-label={t('close')}
-            className="absolute top-3 right-3 z-10 flex size-9 items-center justify-center rounded-full bg-white/90 shadow"
+            className="absolute top-3 right-3 z-10 flex size-9 items-center justify-center rounded-full bg-paper/90 shadow"
           >
             <XIcon className="size-5" />
           </button>
         )}
         <div className="overflow-y-auto">{children}</div>
-        {footer && (
-          <div className="border-t border-slate-100 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{footer}</div>
-        )}
+        {footer && <div className="border-t border-line p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{footer}</div>}
       </div>
     </div>
   )

@@ -12,7 +12,7 @@ export default function Img({
 }) {
   const [loaded, setLoaded] = useState(false)
   return (
-    <div className={`overflow-hidden bg-slate-100 ${className}`}>
+    <div className={`overflow-hidden bg-cream ${className}`}>
       {src && (
         <img
           src={src}

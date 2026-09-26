@@ -31,10 +31,22 @@ export interface TableInput {
   is_active: boolean
 }
 
+export interface DayHours {
+  open: string // "HH:MM" or "HH:MM:SS"
+  close: string
+  closed: boolean
+}
+
 export interface RestaurantSettings {
   name: Record<string, string>
+  tagline: Record<string, string>
   logo: string | null
   logo_urls: ImageUrls | null
+  cover: string | null
+  cover_urls: ImageUrls | null
+  wifi_name: string | null
+  wifi_password: string | null
+  opening_hours: DayHours[] | null // Monday first; null: not shown to guests
   currency: string
   languages: string[]
   default_language: string

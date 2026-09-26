@@ -27,6 +27,13 @@ class RestaurantSettings(Base):
     session_ttl_minutes: Mapped[int] = mapped_column(default=180)
     require_first_order_confirmation: Mapped[bool] = mapped_column(default=True)
     require_table_open: Mapped[bool] = mapped_column(default=False)
+    # Guest home screen: a line under the name, a cover photo, Wi-Fi and opening hours
+    tagline: Mapped[dict] = mapped_column(JSONB, default=dict)
+    cover: Mapped[str | None] = mapped_column(String(64))  # media key
+    wifi_name: Mapped[str | None] = mapped_column(String(64))
+    wifi_password: Mapped[str | None] = mapped_column(String(64))
+    # Seven entries, Monday first: {"open": "11:00", "close": "23:00", "closed": false}; null = not shown
+    opening_hours: Mapped[list | None] = mapped_column(JSONB)
     # Staff chat in Telegram that mirrors new orders and calls
     telegram_enabled: Mapped[bool] = mapped_column(default=False)
     telegram_bot_token: Mapped[str | None] = mapped_column(String(128))  # write-only in the API

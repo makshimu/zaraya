@@ -126,7 +126,7 @@ export default function CartSheet({
             <button
               onClick={submit}
               disabled={busy || !!blockedReason || !allAvailable}
-              className="flex w-full items-center justify-between rounded-2xl bg-blue-600 px-5 py-4 text-lg font-semibold text-white disabled:bg-slate-300"
+              className="flex w-full items-center justify-between rounded-2xl bg-wine px-5 py-4 text-lg font-semibold text-white disabled:bg-muted/40"
             >
               <span>{busy ? t('sending') : t('placeOrder')}</span>
               <span data-testid="cart-total">{money(total)}</span>
@@ -136,7 +136,7 @@ export default function CartSheet({
       }
     >
       {lines.length === 0 ? (
-        <p className="p-10 text-center text-slate-500">{t('cartEmpty')}</p>
+        <p className="p-10 text-center text-muted">{t('cartEmpty')}</p>
       ) : (
         <div className="space-y-4 p-5">
           {lines.map(({ line, item, groups, unit, available }) => {
@@ -149,20 +149,18 @@ export default function CartSheet({
               <div key={line.key} data-testid="cart-line" className={`flex gap-3 ${flagged ? 'opacity-60' : ''}`}>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold">{item ? l(item.name) : t('unavailableDish')}</div>
-                  {item && item.prices.length > 1 && price && (
-                    <div className="text-sm text-slate-500">{l(price.name)}</div>
-                  )}
+                  {item && item.prices.length > 1 && price && <div className="text-sm text-muted">{l(price.name)}</div>}
                   {mods.length > 0 && (
-                    <div className="text-sm text-slate-500">{mods.map((m) => l(m!.name)).join(', ')}</div>
+                    <div className="text-sm text-muted">{mods.map((m) => l(m!.name)).join(', ')}</div>
                   )}
-                  {line.comment && <div className="text-sm text-slate-500 italic">«{line.comment}»</div>}
+                  {line.comment && <div className="text-sm text-muted italic">«{line.comment}»</div>}
                   {flagged && <div className="text-sm font-medium text-red-600">{t('outOfStock')}</div>}
                   <div className="mt-2 flex items-center gap-3">
                     <button
                       aria-label={t('decrease')}
                       disabled={line.quantity <= 1}
                       onClick={() => cart.setQuantity(line.key, line.quantity - 1)}
-                      className="flex size-8 items-center justify-center rounded-full border border-slate-200 disabled:opacity-30"
+                      className="flex size-8 items-center justify-center rounded-full border border-line disabled:opacity-30"
                     >
                       <MinusIcon className="size-4" />
                     </button>
@@ -170,7 +168,7 @@ export default function CartSheet({
                     <button
                       aria-label={t('increase')}
                       onClick={() => cart.setQuantity(line.key, line.quantity + 1)}
-                      className="flex size-8 items-center justify-center rounded-full border border-slate-200"
+                      className="flex size-8 items-center justify-center rounded-full border border-line"
                     >
                       <PlusIcon className="size-4" />
                     </button>
@@ -180,7 +178,7 @@ export default function CartSheet({
                   <button
                     aria-label={t('remove')}
                     onClick={() => cart.remove(line.key)}
-                    className="flex size-8 items-center justify-center rounded-full text-slate-400"
+                    className="flex size-8 items-center justify-center rounded-full text-muted"
                   >
                     <XIcon className="size-4" />
                   </button>
@@ -197,7 +195,7 @@ export default function CartSheet({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder={t('orderCommentPlaceholder')}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-base outline-none focus:border-blue-500"
+              className="w-full rounded-xl border border-line px-4 py-3 text-base outline-none focus:border-wine"
             />
           </label>
         </div>

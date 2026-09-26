@@ -8,7 +8,12 @@ from app.services.sessions import SessionStatus
 
 class RestaurantOut(BaseModel):
     name: dict[str, str]
+    tagline: dict[str, str]
     logo_urls: ImageUrls | None
+    cover_urls: ImageUrls | None
+    wifi_name: str | None
+    wifi_password: str | None
+    opening_hours: list[dict] | None  # Monday first: {"open", "close", "closed"}
     currency: str
     languages: list[str]
     default_language: str
@@ -51,6 +56,7 @@ class GuestCategoryOut(BaseModel):
 class GuestMenuOut(BaseModel):
     restaurant: RestaurantOut
     categories: list[GuestCategoryOut]
+    popular_item_ids: list[int]  # for the home screen, best first
     modifier_groups: list[GuestModifierGroupOut]
 
 

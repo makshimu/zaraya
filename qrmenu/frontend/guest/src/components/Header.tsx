@@ -1,31 +1,35 @@
 import { useContext, useState } from 'react'
 
 import { tr } from '../../../shared/localized'
-import { LANGUAGE_NAMES, LangContext, useT } from '../i18n'
+import { LangContext, useT } from '../i18n'
 import type { GuestMenu } from '../types'
-import { SearchIcon, XIcon } from './icons'
+import { ChevronLeftIcon, SearchIcon, XIcon } from './icons'
+import LanguagePill from './LanguagePill'
 
 export default function Header({
   restaurant,
   tableNumber,
   query,
   onQuery,
+  onBack,
 }: {
   restaurant: GuestMenu['restaurant']
   tableNumber: string | null
   query: string
   onQuery: (q: string) => void
+  onBack: () => void
 }) {
   const t = useT()
-  const { lang, setLang } = useContext(LangContext)
+  const { lang } = useContext(LangContext)
   const [searching, setSearching] = useState(false)
   const name = tr(restaurant.name, lang, restaurant.default_language)
+  const round = 'flex size-10 shrink-0 items-center justify-center rounded-full border border-line bg-paper'
 
   return (
-    <div className="flex h-16 items-center gap-3 px-4">
+    <div className="flex h-16 items-center gap-2 px-4">
       {searching ? (
         <label className="relative flex-1">
-          <SearchIcon className="pointer-events-none absolute top-2.5 left-3 size-5 text-slate-400" />
+          <SearchIcon className="pointer-events-none absolute top-2.5 left-3 size-5 text-muted" />
           <input
             autoFocus
             type="search"
@@ -33,21 +37,17 @@ export default function Header({
             placeholder={t('search')}
             value={query}
             onChange={(e) => onQuery(e.target.value)}
-            className="w-full rounded-full bg-slate-100 py-2 pr-4 pl-10 text-base outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-full border border-line bg-paper py-2 pr-4 pl-10 text-base outline-none focus:ring-2 focus:ring-wine/20"
           />
         </label>
       ) : (
         <>
-          {restaurant.logo_urls && (
-            <img
-              src={restaurant.logo_urls.w400}
-              alt=""
-              className="size-10 rounded-full object-cover max-[360px]:hidden"
-            />
-          )}
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-lg leading-tight font-bold">{name}</div>
-            {tableNumber && <div className="text-sm text-slate-500">{t('table', { number: tableNumber })}</div>}
+          <button aria-label={t('back')} onClick={onBack} className={round} data-testid="back-home">
+            <ChevronLeftIcon className="size-5" />
+          </button>
+          <div className="min-w-0 flex-1 pl-1">
+            <div className="truncate font-serif text-lg leading-tight font-bold">{name}</div>
+            {tableNumber && <div className="text-sm text-muted">{t('table', { number: tableNumber })}</div>}
           </div>
         </>
       )}
@@ -57,24 +57,11 @@ export default function Header({
           if (searching) onQuery('')
           setSearching(!searching)
         }}
-        className="flex size-10 shrink-0 items-center justify-center rounded-full border border-slate-200"
+        className={round}
       >
         {searching ? <XIcon className="size-5" /> : <SearchIcon className="size-5" />}
       </button>
-      {restaurant.languages.length > 1 && (
-        <select
-          aria-label={t('language')}
-          value={lang}
-          onChange={(e) => setLang(e.target.value)}
-          className="h-10 max-w-32 shrink-0 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium"
-        >
-          {restaurant.languages.map((l) => (
-            <option key={l} value={l}>
-              {LANGUAGE_NAMES[l] ?? l.toUpperCase()}
-            </option>
-          ))}
-        </select>
-      )}
+      <LanguagePill languages={restaurant.languages} tone="light" />
     </div>
   )
 }

@@ -66,5 +66,22 @@
   "pay.card": "カード",
   "pay.qr": "QR振込",
   "tableNotOpen": "スタッフにテーブルを開けてもらうと注文できます",
-  "previewNotice": "プレビューです — 注文や呼び出しは送信されません"
+  "previewNotice": "プレビューです — 注文や呼び出しは送信されません",
+  "menuTitle": "メニュー",
+  "menuSub": "料理を見る",
+  "callStaff": "スタッフを呼ぶ",
+  "callStaffSub": "係員をお呼びします",
+  "getBill": "お会計",
+  "getBillSub": "スピーディーで便利",
+  "wifi": "Wi-Fi",
+  "wifiPassword": "パスワード",
+  "noPassword": "パスワード不要",
+  "hours": "営業時間",
+  "everyDay": "毎日",
+  "today": "本日",
+  "closedToday": "本日休業",
+  "popular": "人気の料理",
+  "seeAll": "すべて見る",
+  "back": "戻る",
+  "copied": "パスワードをコピーしました"
 }

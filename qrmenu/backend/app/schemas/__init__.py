@@ -75,6 +75,12 @@ class RestaurantSettingsOut(BaseModel):
     session_ttl_minutes: int
     require_first_order_confirmation: bool
     require_table_open: bool
+    tagline: dict[str, str]
+    cover: str | None
+    cover_urls: dict[str, str] | None = None
+    wifi_name: str | None
+    wifi_password: str | None
+    opening_hours: list[dict] | None
     telegram_enabled: bool
     telegram_chat_id: str | None
     telegram_token_set: bool = False  # the token itself is never sent back

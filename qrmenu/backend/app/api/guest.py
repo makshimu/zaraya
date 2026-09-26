@@ -1,8 +1,9 @@
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Response, WebSocket, status
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import DB
@@ -15,6 +16,7 @@ from app.models import (
     Item,
     ModifierGroup,
     Order,
+    OrderItem,
     RestaurantSettings,
     ServiceCall,
     Table,
@@ -109,6 +111,29 @@ async def get_session(db: DB, session: OptionalSession) -> GuestSessionOut:
     )
 
 
+POPULAR_COUNT = 8
+
+
+async def popular_items(db: DB, categories: list[GuestCategoryOut]) -> list[int]:
+    """Dishes marked "hit" first, then the most ordered of the last 30 days; only what a guest
+    can order right now."""
+    orderable = [i for c in categories for i in c.items if i.is_available]
+    ids = {i.id for i in orderable}
+    picked = [i.id for i in orderable if "hit" in i.badges]
+    if len(picked) < POPULAR_COUNT and ids:
+        since = datetime.now(UTC) - timedelta(days=30)
+        best = await db.scalars(
+            select(OrderItem.item_id)
+            .join(Order)
+            .where(Order.created_at >= since, OrderItem.item_id.in_(ids))
+            .group_by(OrderItem.item_id)
+            .order_by(func.sum(OrderItem.quantity).desc())
+            .limit(POPULAR_COUNT * 2)
+        )
+        picked += [i for i in best if i not in picked]
+    return picked[:POPULAR_COUNT]
+
+
 @router.get("/menu", response_model=GuestMenuOut)
 async def get_menu(db: DB) -> GuestMenuOut:
     """Public menu as the guest sees it right now. Viewable without a session."""
@@ -167,9 +192,15 @@ async def get_menu(db: DB) -> GuestMenuOut:
         )
 
     return GuestMenuOut(
+        popular_item_ids=await popular_items(db, out_categories),
         restaurant=RestaurantOut(
             name=settings.name,
+            tagline=settings.tagline,
             logo_urls=media.image_urls(settings.logo),
+            cover_urls=media.image_urls(settings.cover),
+            wifi_name=settings.wifi_name,
+            wifi_password=settings.wifi_password,
+            opening_hours=settings.opening_hours,
             currency=settings.currency,
             languages=settings.languages,
             default_language=settings.default_language,

@@ -9,6 +9,15 @@ RESTAURANT_NAME = {
     "zh": "老大",
 }
 
+TAGLINE = {
+    "vi": "Ẩm thực Việt Nam",
+    "en": "Vietnamese cuisine",
+    "ru": "Вьетнамская кухня",
+    "ja": "ベトナム料理",
+    "ko": "베트남 요리",
+    "zh": "越南菜",
+}
+
 MODIFIER_GROUPS = {
     "toppings": {
         "name": {"vi": "Thêm topping", "en": "Extra toppings", "ru": "Топпинги", "ja": "トッピング", "ko": "토핑 추가", "zh": "加料"},

@@ -4,7 +4,7 @@ import { api } from './client'
 import type { RestaurantSettings } from './types'
 
 // telegram_bot_token: undefined keeps the saved token, '' removes it
-export type SettingsInput = Omit<RestaurantSettings, 'logo_urls' | 'telegram_token_set'> & {
+export type SettingsInput = Omit<RestaurantSettings, 'logo_urls' | 'cover_urls' | 'telegram_token_set'> & {
   telegram_bot_token?: string
 }
 

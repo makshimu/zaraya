@@ -30,6 +30,7 @@ from app.demo.menu_data import (
     LANGUAGE_TASTE,
     MODIFIER_GROUPS,
     RESTAURANT_NAME,
+    TAGLINE,
 )
 from app.models import (
     CallStatus,
@@ -61,6 +62,7 @@ from app.services.bootstrap import ensure_initial_data
 log = logging.getLogger("demo")
 FONT = Path(__file__).resolve().parent.parent / "assets" / "fonts" / "DejaVuSans-Bold.ttf"
 TZ = "Asia/Ho_Chi_Minh"
+COVER = Path(__file__).resolve().parent / "cover.jpg"  # the dining room at night
 DAYS = 30
 
 # Colours of the drawn "photos": background, plate, (food colour, size, count)…
@@ -98,11 +100,14 @@ def draw_dish(style: str, seed: int) -> bytes:
 
 
 def draw_logo() -> bytes:
-    img = Image.new("RGB", (600, 600), (255, 255, 255))
+    """A red name seal, like the chop stamped next to a restaurant's name."""
+    img = Image.new("RGBA", (600, 600), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    d.ellipse((20, 20, 580, 580), fill=(22, 101, 52))
-    font = ImageFont.truetype(str(FONT), 230)
-    d.text((300, 290), "LĐ", font=font, fill=(250, 204, 21), anchor="mm")
+    red = (178, 34, 34, 255)
+    d.rounded_rectangle((40, 40, 560, 560), radius=40, outline=red, width=34)
+    d.rounded_rectangle((100, 100, 500, 500), radius=18, outline=red, width=10)
+    font = ImageFont.truetype(str(FONT), 190)
+    d.text((300, 300), "LĐ", font=font, fill=red, anchor="mm")
     buf = io.BytesIO()
     img.save(buf, "PNG")
     return buf.getvalue()
@@ -143,7 +148,14 @@ async def seed(reset: bool, if_empty: bool) -> None:
         settings.default_language = "vi"
         settings.currency = "VND"
         settings.timezone = TZ
+        media.delete_image(settings.logo)
+        media.delete_image(settings.cover)
         settings.logo = media.save_image(draw_logo())
+        settings.cover = media.save_image(COVER.read_bytes())
+        settings.tagline = TAGLINE
+        settings.wifi_name = "LaoDai_Guest"
+        settings.wifi_password = "laodai2024"
+        settings.opening_hours = [{"open": "07:00", "close": "23:00", "closed": False} for _ in range(7)]
         settings.require_first_order_confirmation = True
         settings.require_table_open = False
 

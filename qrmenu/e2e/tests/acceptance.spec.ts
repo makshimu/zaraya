@@ -4,7 +4,7 @@
  */
 import { expect, test } from '@playwright/test'
 
-import { adminPage, chimes, closeContexts, phone, Seed } from './helpers'
+import { adminPage, chimes, closeContexts, openMenu, phone, Seed } from './helpers'
 
 let seed: Seed
 let data: Awaited<ReturnType<Seed['menuAndTable']>>
@@ -28,11 +28,26 @@ test.afterEach(async () => {
   await seed.cleanup()
 })
 
-test('scan the table QR → the menu opens with the table number', async ({ browser, baseURL }) => {
+test('scan the table QR → the home screen with the table number, Wi-Fi and hours, then the menu', async ({
+  browser,
+  baseURL,
+}) => {
+  const hours = Array.from({ length: 7 }, () => ({ open: '10:00', close: '22:30', closed: false }))
+  await seed.settings({ wifi_name: `Cafe-${seed.tag}`, wifi_password: 'secret-pass', opening_hours: hours })
   const guest = await phone(browser, baseURL)
   await guest.goto(data.table.qr_url)
   await expect(guest.getByText(`Стол e2e-${seed.tag}`)).toBeVisible()
+  const info = guest.getByTestId('info-card')
+  await expect(info).toContainText(`Cafe-${seed.tag}`)
+  await expect(info).toContainText('secret-pass')
+  await expect(info).toContainText('10:00 – 22:30')
+  await expect(info).toContainText('Ежедневно')
+
+  await openMenu(guest)
   await expect(guest.getByText(`Шакшука ${seed.tag}`)).toBeVisible()
+  // the phone's Back button returns to the home screen
+  await guest.goBack()
+  await expect(guest.getByTestId('open-menu')).toBeVisible()
 })
 
 test('order a dish with a topping → the order shows up in the staff panel within 2 s, with sound', async ({
@@ -42,6 +57,7 @@ test('order a dish with a topping → the order shows up in the staff panel with
   const staff = await adminPage(browser, baseURL)
   const guest = await phone(browser, baseURL)
   await guest.goto(data.table.qr_url)
+  await openMenu(guest)
 
   await guest.getByText(`Шакшука ${seed.tag}`).click()
   await guest.getByRole('dialog').getByText('Большая').click()
@@ -129,10 +145,12 @@ test('switch a dish off → it disappears for the guest and in the live preview 
 }) => {
   const guest = await phone(browser, baseURL)
   await guest.goto(data.table.qr_url)
+  await openMenu(guest)
   await expect(guest.getByText(`Кофе ${seed.tag}`)).toBeVisible()
 
   const staff = await adminPage(browser, baseURL, '/admin/menu')
   const preview = staff.frameLocator('[data-testid=phone-preview] iframe')
+  await openMenu(preview)
   await expect(preview.getByText(`Кофе ${seed.tag}`)).toBeVisible()
 
   await staff
@@ -163,6 +181,7 @@ test('session TTL: after it expires the guest can browse but must rescan to orde
   await seed.settings({ session_ttl_minutes: 1 })
   const guest = await phone(browser, baseURL)
   await guest.goto(data.table.qr_url)
+  await openMenu(guest)
   await expect(guest.getByText(`Шакшука ${seed.tag}`)).toBeVisible()
   await expect(guest.getByText('Отсканируйте QR-код на столе заново').first()).toBeVisible({ timeout: 80_000 })
   await expect(guest.getByText(`Шакшука ${seed.tag}`)).toBeVisible()

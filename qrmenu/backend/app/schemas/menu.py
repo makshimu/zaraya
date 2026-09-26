@@ -205,6 +205,14 @@ class MenuOut(BaseModel):
     modifier_groups: list[ModifierGroupOut]
 
 
+class DayHours(BaseModel):
+    """Opening hours of one weekday; close before open means past midnight."""
+
+    open: time = time(11, 0)
+    close: time = time(23, 0)
+    closed: bool = False
+
+
 class RestaurantSettingsIn(BaseModel):
     name: LocalizedRequired
     logo: ImageKey = None
@@ -215,6 +223,11 @@ class RestaurantSettingsIn(BaseModel):
     session_ttl_minutes: int = Field(ge=1, le=24 * 60)
     require_first_order_confirmation: bool
     require_table_open: bool
+    tagline: Localized = {}
+    cover: ImageKey = None
+    wifi_name: str | None = Field(default=None, max_length=64)
+    wifi_password: str | None = Field(default=None, max_length=64)
+    opening_hours: list[DayHours] | None = Field(default=None, min_length=7, max_length=7)  # Monday first
     telegram_enabled: bool = False
     telegram_chat_id: str | None = Field(default=None, pattern=r"^(-?\d{1,20}|@[A-Za-z0-9_]{5,32})$")
     # None keeps the stored token, "" removes it
@@ -225,6 +238,8 @@ class RestaurantSettingsIn(BaseModel):
         from zoneinfo import available_timezones
 
         self.languages = list(dict.fromkeys(self.languages))
+        self.wifi_name = (self.wifi_name or "").strip() or None
+        self.wifi_password = (self.wifi_password or "").strip() or None
         if self.default_language not in self.languages:
             raise ValueError("default_language must be one of languages")
         # Default language first: the admin shows it first and requires it

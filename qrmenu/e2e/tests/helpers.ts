@@ -1,4 +1,4 @@
-import { devices, expect, type APIRequestContext, type Browser, type BrowserContext, type Page } from '@playwright/test'
+import { devices, expect, type APIRequestContext, type Browser, type BrowserContext, type FrameLocator, type Page } from '@playwright/test'
 
 export const ADMIN = {
   email: process.env.ADMIN_EMAIL ?? 'admin@example.com',
@@ -39,6 +39,7 @@ export class Seed {
   async settings(changes: Record<string, unknown>) {
     const current = await this.call('get', '/settings')
     delete current.logo_urls
+    delete current.cover_urls
     delete current.telegram_token_set
     this.originalSettings ??= { ...current }
     await this.call('put', '/settings', { ...current, ...changes })
@@ -115,6 +116,11 @@ export async function phone(browser: Browser, baseURL: string | undefined): Prom
   })
   contexts.push(context)
   return context.newPage()
+}
+
+/** From the guest home screen (what the QR opens) to the full menu. */
+export async function openMenu(guest: Page | FrameLocator) {
+  await guest.getByTestId('open-menu').click()
 }
 
 /** The staff panel, signed in, counting chimes so tests can assert "with sound". */

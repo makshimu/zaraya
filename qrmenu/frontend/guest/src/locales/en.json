@@ -66,5 +66,22 @@
   "pay.card": "Card",
   "pay.qr": "QR transfer",
   "tableNotOpen": "Ask the waiter to open the table — then you can order",
-  "previewNotice": "This is a preview — orders and calls are not sent"
+  "previewNotice": "This is a preview — orders and calls are not sent",
+  "menuTitle": "Menu",
+  "menuSub": "Explore our dishes",
+  "callStaff": "Call staff",
+  "callStaffSub": "Request an attendant",
+  "getBill": "Get the bill",
+  "getBillSub": "Fast and convenient",
+  "wifi": "Wi-Fi",
+  "wifiPassword": "Password",
+  "noPassword": "No password needed",
+  "hours": "Working hours",
+  "everyDay": "Every day",
+  "today": "Today",
+  "closedToday": "Closed today",
+  "popular": "Popular dishes",
+  "seeAll": "See all",
+  "back": "Back",
+  "copied": "Password copied"
 }

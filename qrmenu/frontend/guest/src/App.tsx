@@ -7,6 +7,7 @@ import { CartProvider, resolveLines, useCart } from './cart'
 import CartSheet from './components/CartSheet'
 import CategoryStrip, { scrollToCategory, useActiveCategory } from './components/CategoryStrip'
 import Header from './components/Header'
+import HomeScreen from './components/HomeScreen'
 import ItemCard from './components/ItemCard'
 import ItemSheet from './components/ItemSheet'
 import OrdersSheet from './components/OrdersSheet'
@@ -49,8 +50,8 @@ export default function App() {
     const l = navigator.language.slice(0, 2)
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-        <p className="text-slate-600">{translate(l, 'loadError')}</p>
-        <button className="rounded-full bg-slate-900 px-6 py-2.5 text-white" onClick={() => menu.refetch()}>
+        <p className="text-muted">{translate(l, 'loadError')}</p>
+        <button className="rounded-full bg-wine px-6 py-2.5 text-white" onClick={() => menu.refetch()}>
           {translate(l, 'retry')}
         </button>
       </div>
@@ -61,7 +62,7 @@ export default function App() {
   return (
     <LangContext.Provider value={{ lang, setLang }}>
       <CartProvider>
-        <MenuScreen menu={menu.data} />
+        <GuestScreen menu={menu.data} />
       </CartProvider>
     </LangContext.Provider>
   )
@@ -87,7 +88,27 @@ function useSessionState(session: GuestSession | undefined) {
   return session.status
 }
 
-function MenuScreen({ menu }: { menu: GuestMenu }) {
+type View = 'home' | 'menu'
+
+/** Home and menu are two screens of one page: the menu gets its own history entry, so the phone's
+ * Back button returns to the home screen. */
+function useView(): [View, (v: View) => void] {
+  const [view, setViewState] = useState<View>(() => (history.state?.view === 'menu' ? 'menu' : 'home'))
+  useEffect(() => {
+    const onPop = () => setViewState(history.state?.view === 'menu' ? 'menu' : 'home')
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+  const setView = useCallback((v: View) => {
+    if (v === 'menu' && history.state?.view !== 'menu') history.pushState({ view: 'menu' }, '')
+    if (v === 'home' && history.state?.view === 'menu') history.back()
+    else setViewState(v)
+  }, [])
+  return [view, setView]
+}
+
+function GuestScreen({ menu }: { menu: GuestMenu }) {
+  const [view, setView] = useView()
   const t = useT()
   const { lang } = useContext(LangContext)
   const session = useSession()
@@ -124,6 +145,9 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
   const openItem = openItemId === null ? null : menu.categories.flatMap((c) => c.items).find((i) => i.id === openItemId)
   const closeSheet = useCallback(() => setOpenItemId(null), [])
 
+  // Each screen starts at its top
+  useEffect(() => window.scrollTo(0, 0), [view])
+
   // In the admin's preview, the menu page can point at a dish or a category
   useEffect(() => {
     if (!isPreview) return
@@ -131,58 +155,80 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
       if (e.origin !== location.origin || !isPreviewCommand(e.data)) return
       setPanel(null)
       setQuery('')
+      setView('menu')
       if (e.data.type === 'show-item') setOpenItemId(e.data.itemId)
       else {
         setOpenItemId(null)
         const id = e.data.categoryId
-        requestAnimationFrame(() => scrollToCategory(id))
+        setTimeout(() => scrollToCategory(id), 50) // after the menu screen has rendered
       }
     }
     window.addEventListener('message', onMessage)
     window.parent.postMessage({ source: GUEST_SOURCE, type: 'ready' }, location.origin)
     return () => window.removeEventListener('message', onMessage)
-  }, [])
+  }, [setView])
 
   useEffect(() => {
     document.title = tr(restaurant.name, lang, fallback) || 'Menu'
   }, [restaurant.name, lang, fallback])
 
+  const tableNumber = session.data?.table?.number ?? null
+
   return (
-    <div className="mx-auto min-h-screen max-w-lg pb-44">
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur">
-        <Header
-          restaurant={restaurant}
-          tableNumber={session.data?.table?.number ?? null}
-          query={query}
-          onQuery={setQuery}
+    <div className="mx-auto min-h-screen max-w-lg bg-cream">
+      {view === 'home' ? (
+        <HomeScreen
+          menu={menu}
+          tableNumber={tableNumber}
+          blockedReason={blockedReason}
+          banner={!isPreview && <SessionBanner reason={reason} />}
+          notify={setToast}
+          onMenu={() => setView('menu')}
+          onItem={(id) => {
+            setView('menu')
+            setOpenItemId(id)
+          }}
         />
-        <CategoryStrip categories={categories} active={active} fallbackLang={fallback} />
-      </header>
+      ) : (
+        <div className="pb-44">
+          <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur">
+            <Header
+              restaurant={restaurant}
+              tableNumber={tableNumber}
+              query={query}
+              onQuery={setQuery}
+              onBack={() => setView('home')}
+            />
+            <CategoryStrip categories={categories} active={active} fallbackLang={fallback} />
+          </header>
 
-      {!isPreview && <SessionBanner reason={reason} />}
+          {!isPreview && <SessionBanner reason={reason} />}
 
-      {menu.categories.length === 0 && <p className="p-10 text-center text-slate-500">{t('emptyMenu')}</p>}
-      {q && categories.length === 0 && <p className="p-10 text-center text-slate-500">{t('nothingFound')}</p>}
+          {menu.categories.length === 0 && <p className="p-10 text-center text-muted">{t('emptyMenu')}</p>}
+          {q && categories.length === 0 && <p className="p-10 text-center text-muted">{t('nothingFound')}</p>}
 
-      {categories.map((c) => (
-        <section key={c.id} id={`cat-${c.id}`} data-section={c.id} className="px-4 pt-6">
-          <h2 className="text-2xl font-bold">{tr(c.name, lang, fallback)}</h2>
-          <div>
-            {c.items.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                currency={restaurant.currency}
-                fallbackLang={fallback}
-                onOpen={() => setOpenItemId(item.id)}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
+          {categories.map((c) => (
+            <section key={c.id} id={`cat-${c.id}`} data-section={c.id} className="px-4 pt-6">
+              <h2 className="font-serif text-2xl font-bold">{tr(c.name, lang, fallback)}</h2>
+              <div>
+                {c.items.map((item) => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    currency={restaurant.currency}
+                    fallbackLang={fallback}
+                    onOpen={() => setOpenItemId(item.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
 
       <BottomBar
         menu={menu}
+        withService={view === 'menu'}
         ordersCount={orders.data?.length ?? 0}
         blockedReason={blockedReason}
         notify={setToast}
@@ -223,6 +269,7 @@ function MenuScreen({ menu }: { menu: GuestMenu }) {
 
 function BottomBar({
   menu,
+  withService,
   ordersCount,
   blockedReason,
   notify,
@@ -230,6 +277,7 @@ function BottomBar({
   onOrders,
 }: {
   menu: GuestMenu
+  withService: boolean // the home screen has its own big buttons
   ordersCount: number
   blockedReason: string | null
   notify: (text: string) => void
@@ -242,15 +290,16 @@ function BottomBar({
   const lines = resolveLines(cart.lines, menu)
   const count = cart.lines.reduce((n, l) => n + l.quantity, 0)
   const total = lines.reduce((sum, r) => sum + (r.available ? r.unit * r.line.quantity : 0), 0)
+  if (!withService && count === 0 && ordersCount === 0) return null
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-lg flex-col gap-2 bg-gradient-to-t from-white via-white/95 to-white/0 p-3 pt-6 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <ServiceButtons blockedReason={blockedReason} notify={notify} />
+    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-lg flex-col gap-2 bg-gradient-to-t from-cream via-cream/95 to-cream/0 p-3 pt-6 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      {withService && <ServiceButtons blockedReason={blockedReason} notify={notify} />}
       {(count > 0 || ordersCount > 0) && (
         <div className="flex gap-2">
           {ordersCount > 0 && (
             <button
               onClick={onOrders}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 font-semibold shadow-lg"
+              className="rounded-2xl border border-line bg-paper px-4 py-3.5 font-semibold shadow-lg"
             >
               {t('myOrders')}
             </button>
@@ -259,7 +308,7 @@ function BottomBar({
             <button
               onClick={onCart}
               data-testid="cart-bar"
-              className="flex flex-1 items-center justify-between rounded-2xl bg-blue-600 px-5 py-3.5 font-semibold text-white shadow-lg"
+              className="flex flex-1 items-center justify-between rounded-2xl bg-wine px-5 py-3.5 font-semibold text-white shadow-lg"
             >
               <span>
                 {t('cart')} · {count}
@@ -276,18 +325,18 @@ function BottomBar({
 function Skeleton() {
   return (
     <div className="mx-auto max-w-lg animate-pulse p-4" aria-busy="true">
-      <div className="mb-4 h-8 w-1/2 rounded bg-slate-100" />
+      <div className="mb-4 h-8 w-1/2 rounded bg-line" />
       <div className="mb-6 flex gap-2">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-8 w-20 rounded-full bg-slate-100" />
+          <div key={i} className="h-8 w-20 rounded-full bg-line" />
         ))}
       </div>
       {[0, 1, 2, 3].map((i) => (
         <div key={i} className="mb-4 flex gap-4">
-          <div className="size-28 rounded-2xl bg-slate-100" />
+          <div className="size-28 rounded-2xl bg-line" />
           <div className="flex-1 space-y-2">
-            <div className="h-4 w-2/3 rounded bg-slate-100" />
-            <div className="h-3 w-full rounded bg-slate-100" />
+            <div className="h-4 w-2/3 rounded bg-line" />
+            <div className="h-3 w-full rounded bg-line" />
           </div>
         </div>
       ))}

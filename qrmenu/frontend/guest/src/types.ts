@@ -46,15 +46,27 @@ export interface GuestModifierGroup {
   modifiers: GuestModifier[]
 }
 
+export interface DayHours {
+  open: string // "HH:MM:SS"
+  close: string
+  closed: boolean
+}
+
 export interface GuestMenu {
   restaurant: {
     name: Localized
+    tagline: Localized
     logo_urls: ImageUrls | null
+    cover_urls: ImageUrls | null
+    wifi_name: string | null
+    wifi_password: string | null
+    opening_hours: DayHours[] | null // Monday first
     currency: string
     languages: string[]
     default_language: string
   }
   categories: GuestCategory[]
+  popular_item_ids: number[]
   modifier_groups: GuestModifierGroup[]
 }
 
