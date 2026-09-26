@@ -6,8 +6,17 @@ import type { Localized } from './types'
 export interface ItemStat {
   item_id: number | null
   name: Localized
+  image_url: string | null
   quantity: number
   revenue: number
+}
+
+export interface Summary {
+  orders: number
+  revenue: number
+  avg_check: number
+  items: number
+  visits: number
 }
 
 export interface Analytics {
@@ -15,7 +24,8 @@ export interface Analytics {
   date_to: string
   currency: string
   timezone: string
-  summary: { orders: number; revenue: number; avg_check: number; items: number; visits: number }
+  summary: Summary
+  previous: Summary // the same number of days right before
   by_hour: { hour: number; orders: number; revenue: number }[]
   heatmap: { weekday: number; hour: number; orders: number }[]
   by_day: { date: string; orders: number; revenue: number }[]

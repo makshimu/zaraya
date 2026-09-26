@@ -1,4 +1,4 @@
-"""Fill the database with a demo café to click through and 30 days of orders for analytics.
+"""Fill the database with a demo café to click through and 90 days of orders for analytics.
 
     docker compose exec api python -m app.demo            # only into an empty menu
     docker compose exec api python -m app.demo --reset    # wipe menu, tables and orders first
@@ -63,7 +63,7 @@ log = logging.getLogger("demo")
 FONT = Path(__file__).resolve().parent.parent / "assets" / "fonts" / "DejaVuSans-Bold.ttf"
 TZ = "Asia/Ho_Chi_Minh"
 COVER = Path(__file__).resolve().parent / "cover.jpg"  # the dining room at night
-DAYS = 30
+DAYS = 90  # the longest analytics preset; also the "previous period" of the 30-day view
 
 # Colours of the drawn "photos": background, plate, (food colour, size, count)…
 STYLES = {
@@ -219,7 +219,7 @@ async def seed(reset: bool, if_empty: bool) -> None:
         await db.flush()
         await db.commit()
 
-        # --- 30 days of history for the analytics page
+        # --- 90 days of history for the analytics page, slowly growing
         tz = ZoneInfo(TZ)
         now = datetime.now(tz)
         n_orders = 0
@@ -274,6 +274,7 @@ async def seed(reset: bool, if_empty: bool) -> None:
             day = (now - timedelta(days=day_offset)).date()
             weekend = day.weekday() >= 5
             visits = rnd.randint(34, 52) if weekend else rnd.randint(20, 34)
+            visits = round(visits * (0.75 + 0.25 * (1 - day_offset / DAYS)))  # the café is getting busier
             for _ in range(visits):
                 hour = weighted(rnd, HOUR_WEIGHTS)
                 at = datetime.combine(day, time(hour, rnd.randint(0, 59)), tz)

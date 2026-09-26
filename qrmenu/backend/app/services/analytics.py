@@ -12,6 +12,7 @@ from sqlalchemy import extract, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Item, Order, OrderItem, OrderStatus, RestaurantSettings
+from app.services import media
 
 # Parts of the day, local time: [start, end) hours
 DAYPARTS = [
@@ -61,6 +62,7 @@ class DayStat(BaseModel):
 class ItemStat(BaseModel):
     item_id: int | None
     name: dict[str, str]
+    image_url: str | None  # the dish's current small photo
     quantity: int
     revenue: int
 
@@ -88,6 +90,7 @@ class AnalyticsOut(BaseModel):
     currency: str
     timezone: str
     summary: Summary
+    previous: Summary  # the same number of days right before, for "+12 %" on the cards
     by_hour: list[HourStat]
     heatmap: list[HeatCell]
     by_day: list[DayStat]
@@ -96,19 +99,17 @@ class AnalyticsOut(BaseModel):
     languages: list[LanguageStat]
 
 
-async def build(db: AsyncSession, date_from: date, date_to: date) -> AnalyticsOut:
-    settings = await db.get_one(RestaurantSettings, 1)
-    tz = settings.timezone
+def period(tz: str, date_from: date, date_to: date) -> tuple:
     start = datetime.combine(date_from, time.min, ZoneInfo(tz))
     end = datetime.combine(date_to + timedelta(days=1), time.min, ZoneInfo(tz))
-    local = func.timezone(tz, Order.created_at)
-    hour = extract("hour", local).label("hour")
-    in_period = (
+    return (
         Order.created_at >= start,
         Order.created_at < end,
         Order.status != OrderStatus.rejected,
     )
 
+
+async def summarize(db: AsyncSession, in_period: tuple) -> Summary:
     row = (
         await db.execute(
             select(
@@ -122,6 +123,26 @@ async def build(db: AsyncSession, date_from: date, date_to: date) -> AnalyticsOu
     items_sold = await db.scalar(
         select(func.coalesce(func.sum(OrderItem.quantity), 0)).join(Order).where(*in_period)
     )
+    return Summary(
+        orders=orders,
+        revenue=revenue,
+        avg_check=revenue // orders if orders else 0,
+        items=int(items_sold),
+        visits=visits,
+    )
+
+
+async def build(db: AsyncSession, date_from: date, date_to: date) -> AnalyticsOut:
+    settings = await db.get_one(RestaurantSettings, 1)
+    tz = settings.timezone
+    local = func.timezone(tz, Order.created_at)
+    hour = extract("hour", local).label("hour")
+    in_period = period(tz, date_from, date_to)
+
+    summary = await summarize(db, in_period)
+    orders = summary.orders
+    length = date_to - date_from + timedelta(days=1)
+    previous = await summarize(db, period(tz, date_from - length, date_from - timedelta(days=1)))
 
     by_hour = {h: HourStat(hour=h, orders=0, revenue=0) for h in range(24)}
     for h, n, rev in await db.execute(
@@ -166,9 +187,8 @@ async def build(db: AsyncSession, date_from: date, date_to: date) -> AnalyticsOu
         .where(*in_period)
         .group_by(OrderItem.item_id, OrderItem.name, hour, Order.language)
     )
-    current_names = {
-        i.id: i.name for i in await db.scalars(select(Item))
-    }  # show today's names; deleted dishes keep their ordered name
+    # Show today's names and photos; deleted dishes keep their ordered name
+    current = {i.id: i for i in await db.scalars(select(Item))}
 
     def key(item_id, name) -> tuple:
         return (item_id,) if item_id is not None else (None, tuple(sorted(name.items())))
@@ -179,14 +199,21 @@ async def build(db: AsyncSession, date_from: date, date_to: date) -> AnalyticsOu
     by_lang: dict[str | None, dict[tuple, list[int]]] = defaultdict(lambda: defaultdict(lambda: [0, 0]))
     for item_id, name, h, lang, qty, rev in rows:
         k = key(item_id, name)
-        names[k] = current_names.get(item_id, name)
+        names[k] = current[item_id].name if item_id in current else name
         for bucket in (total_by_item[k], by_part[daypart(int(h))][k], by_lang[lang][k]):
             bucket[0] += int(qty)
             bucket[1] += int(rev)
 
     def top(bucket: dict[tuple, list[int]], n: int) -> list[ItemStat]:
         ranked = sorted(bucket.items(), key=lambda kv: (-kv[1][0], -kv[1][1]))[:n]
-        return [ItemStat(item_id=k[0], name=names[k], quantity=q, revenue=r) for k, (q, r) in ranked]
+        return [
+            ItemStat(item_id=k[0], name=names[k], image_url=photo(k[0]), quantity=q, revenue=r)
+            for k, (q, r) in ranked
+        ]
+
+    def photo(item_id: int | None) -> str | None:
+        urls = media.image_urls(current[item_id].image) if item_id in current else None
+        return urls["w400"] if urls else None
 
     dayparts = []
     for part, from_hour, to_hour in DAYPARTS:
@@ -224,13 +251,8 @@ async def build(db: AsyncSession, date_from: date, date_to: date) -> AnalyticsOu
         date_to=date_to,
         currency=settings.currency,
         timezone=tz,
-        summary=Summary(
-            orders=orders,
-            revenue=revenue,
-            avg_check=revenue // orders if orders else 0,
-            items=int(items_sold),
-            visits=visits,
-        ),
+        summary=summary,
+        previous=previous,
         by_hour=list(by_hour.values()),
         heatmap=heatmap,
         by_day=by_day,

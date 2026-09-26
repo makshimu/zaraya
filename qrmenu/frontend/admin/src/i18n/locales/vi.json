@@ -309,7 +309,7 @@
     },
     "byHour": "Đơn đến vào lúc nào",
     "byHourHint": "Số đơn theo giờ trong kỳ, giờ địa phương ({{tz}})",
-    "peak": "Cao điểm: {{hour}}:00–{{next}}:00",
+    "peak": "Cao điểm: {{hour}}:00 – {{next}}:00",
     "showTable": "Xem dạng bảng",
     "showChart": "Xem biểu đồ",
     "hour": "Giờ",
@@ -344,7 +344,10 @@
     "ordersN_other": "{{count}} đơn",
     "tooltipHour": "{{hour}}:00 — {{orders}}, {{revenue}}",
     "tooltipCell": "{{day}}, {{hour}}:00 — {{orders}}",
-    "tooltipDay": "{{date}} — {{orders}}, {{revenue}}"
+    "tooltipDay": "{{date}} — {{orders}}, {{revenue}}",
+    "subtitle": "Tổng quan về đơn hàng, doanh thu và hoạt động của khách",
+    "chooseDates": "Chọn ngày",
+    "vsPrevious_other": "so với {{count}} ngày trước"
   },
   "welcome": {
     "tagline": "Khẩu hiệu",

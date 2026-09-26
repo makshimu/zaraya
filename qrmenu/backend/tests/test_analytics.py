@@ -46,6 +46,8 @@ async def test_analytics(admin_client, guest_client):
     b = await place(guest_client, item, "en")  # 75 000
     c = await place(guest_client, item, "en")
     rejected = await place(guest_client, item, "en", qty=5)
+    earlier = await place(guest_client, item, "vi")  # falls into the previous 30 days
+    await move(earlier["id"], morning - timedelta(days=35))
     await move(a["id"], morning)
     await move(b["id"], evening)
     await move(c["id"], evening)
@@ -54,6 +56,8 @@ async def test_analytics(admin_client, guest_client):
 
     data = (await admin_client.get(f"{API}/analytics")).json()
     assert data["summary"] == {"orders": 3, "revenue": 300000, "avg_check": 100000, "items": 4, "visits": 1}
+    assert data["previous"] == {"orders": 1, "revenue": 75000, "avg_check": 75000, "items": 1, "visits": 1}
+    assert "image_url" in data["top_items"][0]
     hours = {h["hour"]: h["orders"] for h in data["by_hour"]}
     assert len(hours) == 24 and hours[9] == 1 and hours[19] == 2
     weekday = morning.isoweekday()

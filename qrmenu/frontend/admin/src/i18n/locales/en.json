@@ -313,7 +313,7 @@
     },
     "byHour": "When orders come in",
     "byHourHint": "Orders by hour over the period, local time ({{tz}})",
-    "peak": "Peak: {{hour}}:00–{{next}}:00",
+    "peak": "Peak: {{hour}}:00 – {{next}}:00",
     "showTable": "Show as table",
     "showChart": "Show chart",
     "hour": "Hour",
@@ -349,7 +349,11 @@
     "tooltipCell": "{{day}}, {{hour}}:00 — {{orders}}",
     "tooltipDay": "{{date}} — {{orders}}, {{revenue}}",
     "ordersN_one": "{{count}} order",
-    "ordersN_other": "{{count}} orders"
+    "ordersN_other": "{{count}} orders",
+    "subtitle": "Orders, revenue and guest activity at a glance",
+    "chooseDates": "Choose dates",
+    "vsPrevious_one": "vs previous {{count}} day",
+    "vsPrevious_other": "vs previous {{count}} days"
   },
   "welcome": {
     "tagline": "Tagline",

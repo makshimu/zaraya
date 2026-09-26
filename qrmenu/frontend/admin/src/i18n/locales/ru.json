@@ -321,7 +321,7 @@
     },
     "byHour": "Когда приходят заказы",
     "byHourHint": "Заказы по часам за период, местное время ({{tz}})",
-    "peak": "Пик: {{hour}}:00–{{next}}:00",
+    "peak": "Пик: {{hour}}:00 – {{next}}:00",
     "showTable": "Показать таблицей",
     "showChart": "Показать график",
     "hour": "Час",
@@ -359,7 +359,13 @@
     "ordersN_one": "{{count}} заказ",
     "ordersN_few": "{{count}} заказа",
     "ordersN_many": "{{count}} заказов",
-    "ordersN_other": "{{count}} заказа"
+    "ordersN_other": "{{count}} заказа",
+    "subtitle": "Общая статистика по заказам, выручке и активности гостей",
+    "chooseDates": "Выбрать даты",
+    "vsPrevious_one": "к пред. {{count}} дню",
+    "vsPrevious_few": "к пред. {{count}} дням",
+    "vsPrevious_many": "к пред. {{count}} дням",
+    "vsPrevious_other": "к пред. {{count}} дням"
   },
   "welcome": {
     "tagline": "Слоган",
